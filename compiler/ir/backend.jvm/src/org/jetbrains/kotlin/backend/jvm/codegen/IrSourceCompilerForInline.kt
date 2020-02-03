@@ -6,16 +6,13 @@
 package org.jetbrains.kotlin.backend.jvm.codegen
 
 import com.intellij.openapi.util.TextRange
-import com.intellij.psi.PsiElement
 import com.intellij.psi.PsiFile
 import org.jetbrains.kotlin.backend.common.CodegenUtil
 import org.jetbrains.kotlin.backend.common.ir.ir2string
 import org.jetbrains.kotlin.codegen.BaseExpressionCodegen
-import org.jetbrains.kotlin.codegen.ClassBuilder
 import org.jetbrains.kotlin.codegen.OwnerKind
 import org.jetbrains.kotlin.codegen.inline.*
 import org.jetbrains.kotlin.codegen.inline.coroutines.FOR_INLINE_SUFFIX
-import org.jetbrains.kotlin.codegen.serialization.JvmSerializationBindings
 import org.jetbrains.kotlin.codegen.state.GenerationState
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptor
 import org.jetbrains.kotlin.descriptors.DeclarationDescriptorWithSource
@@ -25,7 +22,6 @@ import org.jetbrains.kotlin.incremental.components.LocationInfo
 import org.jetbrains.kotlin.incremental.components.LookupLocation
 import org.jetbrains.kotlin.incremental.components.Position
 import org.jetbrains.kotlin.ir.declarations.IrAttributeContainer
-import org.jetbrains.kotlin.ir.declarations.IrClass
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.declarations.IrFunction
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
@@ -36,7 +32,6 @@ import org.jetbrains.kotlin.psi.KtElement
 import org.jetbrains.kotlin.psi.doNotAnalyze
 import org.jetbrains.kotlin.resolve.DescriptorUtils
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.ErrorsJvm.SUSPENSION_POINT_INSIDE_MONITOR
-import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOrigin
 import org.jetbrains.kotlin.resolve.jvm.jvmSignature.JvmMethodSignature
 import org.jetbrains.kotlin.resolve.source.getPsi
 import org.jetbrains.org.objectweb.asm.*
@@ -118,8 +113,8 @@ class IrSourceCompilerForInline(
             } ?: callee
         else
             callee
-        val classCodegen = FakeClassCodegen(forInlineFunction, codegen.classCodegen)
-        val node = FunctionCodegen(forInlineFunction, classCodegen).generate()
+        val classCodegen = ClassCodegen.getOrCreate(callee.parentAsClass, codegen.context)
+        val node = classCodegen.generateMethodNode(forInlineFunction)
         return SMAPAndMethodNode(node, SMAP(classCodegen.getOrCreateSourceMapper().resultMappings))
     }
 
@@ -166,89 +161,4 @@ class IrSourceCompilerForInline(
     }
 
     private fun findElement() = (callElement.symbol.descriptor.original as? DeclarationDescriptorWithSource)?.source?.getPsi() as? KtElement
-
-    internal val isPrimaryCopy: Boolean
-        get() = codegen.classCodegen !is FakeClassCodegen
-
-    private class FakeClassCodegen(irFunction: IrFunction, codegen: ClassCodegen) :
-        ClassCodegen(irFunction.parent as IrClass, codegen.context) {
-
-        override fun createClassBuilder(): ClassBuilder {
-            return FakeBuilder
-        }
-
-        companion object {
-            val FakeBuilder = object : ClassBuilder {
-                override fun newField(
-                    origin: JvmDeclarationOrigin,
-                    access: Int,
-                    name: String,
-                    desc: String,
-                    signature: String?,
-                    value: Any?
-                ): FieldVisitor {
-                    TODO("not implemented")
-                }
-
-                override fun newMethod(
-                    origin: JvmDeclarationOrigin,
-                    access: Int,
-                    name: String,
-                    desc: String,
-                    signature: String?,
-                    exceptions: Array<out String>?
-                ): MethodVisitor {
-                    TODO("not implemented")
-                }
-
-                override fun getSerializationBindings(): JvmSerializationBindings {
-                    return JvmSerializationBindings()
-                }
-
-                override fun newAnnotation(desc: String, visible: Boolean): AnnotationVisitor {
-                    TODO("not implemented")
-                }
-
-                override fun done() {
-                    TODO("not implemented")
-                }
-
-                override fun getVisitor(): ClassVisitor {
-                    TODO("not implemented")
-                }
-
-                override fun defineClass(
-                    origin: PsiElement?,
-                    version: Int,
-                    access: Int,
-                    name: String,
-                    signature: String?,
-                    superName: String,
-                    interfaces: Array<out String>
-                ) {
-                    TODO("not implemented")
-                }
-
-                override fun visitSource(name: String, debug: String?) {
-                    TODO("not implemented")
-                }
-
-                override fun visitOuterClass(owner: String, name: String?, desc: String?) {
-                    TODO("not implemented")
-                }
-
-                override fun visitSMAP(smap: SourceMapper, backwardsCompatibleSyntax: Boolean) {
-                    TODO("not implemented")
-                }
-
-                override fun visitInnerClass(name: String, outerName: String?, innerName: String?, access: Int) {
-                    TODO("not implemented")
-                }
-
-                override fun getThisName(): String {
-                    TODO("not implemented")
-                }
-            }
-        }
-    }
 }
