@@ -61,6 +61,8 @@ fun KotlinType.isBoolean(): Boolean = KotlinBuiltIns.isBoolean(this)
 fun KotlinType.isPrimitiveNumberType(): Boolean = KotlinBuiltIns.isPrimitiveType(this) && !isBoolean()
 fun KotlinType.isUnsignedNumberType(): Boolean = UnsignedTypes.isUnsignedType(this)
 fun KotlinType.isSignedOrUnsignedNumberType(): Boolean = isPrimitiveNumberType() || isUnsignedNumberType()
+fun KotlinType.isSignedOrUnsignedNumberTypeWithAnyNullability(): Boolean =
+    KotlinBuiltIns.isPrimitiveTypeOrNullablePrimitiveType(this) || isUnsignedNumberType()
 
 fun KotlinType.isBooleanOrNullableBoolean(): Boolean = KotlinBuiltIns.isBooleanOrNullableBoolean(this)
 fun KotlinType.isNotNullThrowable(): Boolean = KotlinBuiltIns.isThrowableOrNullableThrowable(this) && !isMarkedNullable
