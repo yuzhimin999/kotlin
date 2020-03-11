@@ -1,11 +1,12 @@
 /*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
 package org.jetbrains.kotlin.gradle
 
 import org.gradle.api.tasks.Exec
+import org.jetbrains.kotlin.gradle.*
 import java.io.File
 
 class KotlinSourceSetProto(
@@ -17,14 +18,15 @@ class KotlinSourceSetProto(
     val dependsOnSourceSets: Set<String>
 ) {
 
-    fun buildKotlinSourceSetImpl(doBuildDependencies: Boolean) = KotlinSourceSetImpl(
-        name,
-        languageSettings,
-        sourceDirs,
-        resourceDirs,
-        if (doBuildDependencies) dependencies.invoke() else emptyArray(),
-        dependsOnSourceSets
-    )
+    fun buildKotlinSourceSetImpl(doBuildDependencies: Boolean) =
+        KotlinSourceSetImpl(
+            name,
+            languageSettings,
+            sourceDirs,
+            resourceDirs,
+            if (doBuildDependencies) dependencies.invoke() else emptyArray(),
+            dependsOnSourceSets
+        )
 
 }
 
@@ -124,7 +126,10 @@ data class KotlinCompilationImpl(
     constructor(kotlinCompilation: KotlinCompilation, cloningCache: MutableMap<Any, Any>) : this(
         kotlinCompilation.name,
         kotlinCompilation.sourceSets.map { initialSourceSet ->
-            (cloningCache[initialSourceSet] as? KotlinSourceSet) ?: KotlinSourceSetImpl(initialSourceSet, cloningCache).also {
+            (cloningCache[initialSourceSet] as? KotlinSourceSet) ?: KotlinSourceSetImpl(
+                initialSourceSet,
+                cloningCache
+            ).also {
                 cloningCache[initialSourceSet] = it
             }
         }.toList(),
@@ -172,15 +177,22 @@ data class KotlinTargetImpl(
         target.name,
         target.presetName,
         target.disambiguationClassifier,
-        KotlinPlatform.byId(target.platform.id) ?: KotlinPlatform.COMMON,
+        KotlinPlatform.byId(target.platform.id)
+            ?: KotlinPlatform.COMMON,
         target.compilations.map { initialCompilation ->
-            (cloningCache[initialCompilation] as? KotlinCompilation) ?: KotlinCompilationImpl(initialCompilation, cloningCache).also {
+            (cloningCache[initialCompilation] as? KotlinCompilation) ?: KotlinCompilationImpl(
+                initialCompilation,
+                cloningCache
+            ).also {
                 cloningCache[initialCompilation] = it
             }
         }.toList(),
         target.testTasks.map { initialTestTask ->
             (cloningCache[initialTestTask] as? KotlinTestTask)
-                ?: KotlinTestTaskImpl(initialTestTask.taskName, initialTestTask.compilationName).also {
+                ?: KotlinTestTaskImpl(
+                    initialTestTask.taskName,
+                    initialTestTask.compilationName
+                ).also {
                     cloningCache[initialTestTask] = it
                 }
         },
@@ -216,7 +228,10 @@ data class KotlinMPPGradleModelImpl(
             ).also { cloningCache[initialSourceSet] = it }
         },
         mppModel.targets.map { initialTarget ->
-            (cloningCache[initialTarget] as? KotlinTarget) ?: KotlinTargetImpl(initialTarget, cloningCache).also {
+            (cloningCache[initialTarget] as? KotlinTarget) ?: KotlinTargetImpl(
+                initialTarget,
+                cloningCache
+            ).also {
                 cloningCache[initialTarget] = it
             }
         }.toList(),

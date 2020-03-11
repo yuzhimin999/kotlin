@@ -41,7 +41,8 @@ class JvmIdePlatformKindTooling : IdePlatformKindTooling() {
     )
 
     override val gradlePluginId = "kotlin-platform-jvm"
-    override val gradlePlatformIds: List<KotlinPlatform> get() = listOf(KotlinPlatform.JVM, KotlinPlatform.ANDROID)
+    override val gradlePlatformIds: List<KotlinPlatform> get() = listOf(
+        KotlinPlatform.JVM, KotlinPlatform.ANDROID)
 
     override val libraryKind: PersistentLibraryKind<*>? = null
     override fun getLibraryDescription(project: Project) = JavaRuntimeLibraryDescription(project)

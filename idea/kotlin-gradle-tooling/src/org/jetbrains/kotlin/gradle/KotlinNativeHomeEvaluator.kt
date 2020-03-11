@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -15,7 +15,12 @@ object KotlinNativeHomeEvaluator {
     private const val FALLBACK_ACCESSOR_METHOD = "getKonanHome"
 
     fun getKotlinNativeHome(project: Project): String? =
-        getKotlinNativeHomePrimary(project) ?: getKotlinNativeHomeFallback(project)
+        getKotlinNativeHomePrimary(
+            project
+        )
+            ?: getKotlinNativeHomeFallback(
+                project
+            )
 
     // Read Kotlin/Native home from the predefined property in Gradle plugin.
     // Should work for Gradle plugin with version >= 1.3.20.

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
@@ -9,6 +9,9 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.jetbrains.kotlin.gradle.KotlinTaskProperties
+import org.jetbrains.kotlin.gradle.KotlinTaskPropertiesBySourceSet
+import org.jetbrains.kotlin.gradle.acknowledgeTask
 import org.jetbrains.plugins.gradle.tooling.ErrorMessageBuilder
 import org.jetbrains.plugins.gradle.tooling.ModelBuilderService
 import java.io.File
@@ -42,7 +45,9 @@ typealias CompilerArgumentsBySourceSet = Map<String, ArgsInfo>
  */
 fun CompilerArgumentsBySourceSet.deepCopy(): CompilerArgumentsBySourceSet {
     val result = HashMap<String, ArgsInfo>()
-    this.forEach { key, value -> result[key] = ArgsInfoImpl(value) }
+    this.forEach { key, value -> result[key] =
+        ArgsInfoImpl(value)
+    }
     return result
 }
 
@@ -177,7 +182,12 @@ class KotlinGradleModelBuilder : AbstractKotlinGradleModelBuilder() {
                 ?: compileTask.getCompilerArguments("getSerializedCompilerArgumentsIgnoreClasspathIssues") ?: emptyList()
             val defaultArguments = compileTask.getCompilerArguments("getDefaultSerializedCompilerArguments").orEmpty()
             val dependencyClasspath = compileTask.getDependencyClasspath()
-            compilerArgumentsBySourceSet[sourceSetName] = ArgsInfoImpl(currentArguments, defaultArguments, dependencyClasspath)
+            compilerArgumentsBySourceSet[sourceSetName] =
+                ArgsInfoImpl(
+                    currentArguments,
+                    defaultArguments,
+                    dependencyClasspath
+                )
             extraProperties.acknowledgeTask(compileTask)
         }
 

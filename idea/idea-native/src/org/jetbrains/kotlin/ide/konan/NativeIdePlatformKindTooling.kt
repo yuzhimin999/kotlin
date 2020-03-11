@@ -32,7 +32,8 @@ class NativeIdePlatformKindTooling : IdePlatformKindTooling() {
 
     override val mavenLibraryIds: List<String> get() = emptyList()
     override val gradlePluginId: String get() = ""
-    override val gradlePlatformIds: List<KotlinPlatform> get() = listOf(KotlinPlatform.NATIVE)
+    override val gradlePlatformIds: List<KotlinPlatform> get() = listOf(
+        KotlinPlatform.NATIVE)
 
     override val libraryKind: PersistentLibraryKind<*> = NativeLibraryKind
     override fun getLibraryDescription(project: Project): CustomLibraryDescription? = null

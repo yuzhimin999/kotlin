@@ -34,6 +34,10 @@ import org.jetbrains.kotlin.cli.common.arguments.ManualLanguageFeatureSetting
 import org.jetbrains.kotlin.cli.common.arguments.parseCommandLineArguments
 import org.jetbrains.kotlin.config.ExternalSystemTestTask
 import org.jetbrains.kotlin.config.LanguageFeature
+import org.jetbrains.kotlin.gradle.KotlinCompilationImpl
+import org.jetbrains.kotlin.gradle.KotlinMPPGradleModelBuilder
+import org.jetbrains.kotlin.gradle.KotlinMPPGradleModelImpl
+import org.jetbrains.kotlin.gradle.compilationFullName
 import org.jetbrains.kotlin.gradle.*
 import org.jetbrains.kotlin.idea.configuration.GradlePropertiesFileFacade.Companion.KOTLIN_NOT_IMPORTED_COMMON_SOURCE_SETS_SETTING
 import org.jetbrains.kotlin.idea.configuration.klib.KotlinNativeLibrariesDependencySubstitutor
@@ -914,7 +918,10 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
             if (compilation.platform.isNotSupported()) return null
             if (Proxy.isProxyClass(compilation.javaClass)) {
                 return createSourceSetInfo(
-                    KotlinCompilationImpl(compilation, HashMap<Any, Any>()),
+                    KotlinCompilationImpl(
+                        compilation,
+                        HashMap<Any, Any>()
+                    ),
                     gradleModule,
                     resolverCtx
                 )
@@ -960,7 +967,10 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
         }
 
         private fun KotlinModule.fullName(simpleName: String = name) = when (this) {
-            is KotlinCompilation -> compilationFullName(simpleName, disambiguationClassifier)
+            is KotlinCompilation -> compilationFullName(
+                simpleName,
+                disambiguationClassifier
+            )
             else -> simpleName
         }
 
