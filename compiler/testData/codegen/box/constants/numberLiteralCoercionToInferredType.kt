@@ -1,5 +1,6 @@
 // IGNORE_BACKEND: JS, JS_IR
 // IGNORE_BACKEND_FIR: JVM_IR
+// WITH_RUNTIME
 
 // FILE: J.java
 
@@ -60,6 +61,9 @@ fun box(): String {
             else -> TODO()
         }
     )
+
+    check<ULong>(selectFirst(0u, 0uL))
+    check<UInt>(selectFirst(0u, 0uL, true))
 
     return "OK"
 }
