@@ -1,12 +1,9 @@
-
 description = "Kotlin AllOpen Compiler Plugin"
 
 plugins {
     kotlin("jvm")
     id("jps-compatible")
 }
-
-jvmTarget = "1.6"
 
 dependencies {
     compileOnly(project(":compiler:plugin-api"))
