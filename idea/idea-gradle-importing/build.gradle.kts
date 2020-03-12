@@ -11,7 +11,6 @@ dependencies {
     compile(kotlinStdlib())
     implementation(project(":idea"))
     implementation(project(":idea:idea-core"))
-    implementation(project(":idea:idea-gradle"))
     implementation(project(":idea:idea-gradle-tooling-api"))
     implementation(project(":kotlin-scripting-compiler-impl"))
 
