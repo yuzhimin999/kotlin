@@ -1,10 +1,11 @@
 /*
- * Copyright 2010-2019 JetBrains s.r.o. and Kotlin Programming Language contributors.
+ * Copyright 2010-2020 JetBrains s.r.o. and Kotlin Programming Language contributors.
  * Use of this source code is governed by the Apache 2.0 license that can be found in the license/LICENSE.txt file.
  */
 
-package org.jetbrains.kotlin.idea.importing
+package org.jetbrains.kotlin.idea.scripting.gradle.importing
 
+import com.intellij.openapi.components.service
 import com.intellij.openapi.externalSystem.model.DataNode
 import com.intellij.openapi.externalSystem.model.Key
 import com.intellij.openapi.externalSystem.model.ProjectKeys
@@ -24,6 +25,8 @@ import com.intellij.pom.Navigatable
 import org.jetbrains.kotlin.idea.core.script.ScriptConfigurationManager
 import org.jetbrains.kotlin.idea.core.script.configuration.cache.CachedConfigurationInputs
 import org.jetbrains.kotlin.idea.core.script.configuration.cache.ScriptConfigurationSnapshot
+import org.jetbrains.kotlin.idea.importing.KOTLIN_DSL_SCRIPT_MODELS
+import org.jetbrains.kotlin.idea.importing.KotlinDslScriptModel
 import org.jetbrains.kotlin.idea.scripting.gradle.GradleScriptInputsWatcher
 import org.jetbrains.kotlin.idea.scripting.gradle.getGradleScriptInputsStamp
 import org.jetbrains.kotlin.idea.scripting.gradle.saveGradleProjectRootsAfterImport
@@ -105,8 +108,8 @@ class KotlinDslScriptModelDataService : AbstractProjectDataService<ProjectData, 
             }
         }
 
-        project.getService(ScriptConfigurationManager::class.java).saveCompilationConfigurationAfterImport(scriptConfigurations)
-        project.getService(GradleScriptInputsWatcher::class.java).clearState()
+        project.service<ScriptConfigurationManager>().saveCompilationConfigurationAfterImport(scriptConfigurations)
+        project.service<GradleScriptInputsWatcher>().clearState()
     }
 
     private fun addBuildScriptDiagnosticMessage(
