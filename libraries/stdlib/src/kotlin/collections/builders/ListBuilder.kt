@@ -5,9 +5,9 @@
 
 package kotlin.collections.builders
 
-@PublishedApi
-internal class ListBuilder<E> private constructor(
-    private var array: Array<E>,
+/*@PublishedApi
+internal */class ListBuilder<E> private constructor(
+    private var array: Array<E>?,
     private var offset: Int,
     private var length: Int,
     private val backing: ListBuilder<E>?
@@ -20,8 +20,9 @@ internal class ListBuilder<E> private constructor(
 
     fun build(): List<E> {
         if (backing != null) throw IllegalStateException() // just in case somebody casts subList to ListBuilder
-        val array = this.array
-//        this.array = null
+        val array = this.array ?: throw IllegalStateException()
+
+        this.array = null
         return ImmutableList(length, array, offset)
     }
 
@@ -31,18 +32,24 @@ internal class ListBuilder<E> private constructor(
     override fun isEmpty(): Boolean = length == 0
 
     override fun get(index: Int): E {
-        checkIndex(index)
+        AbstractList.checkElementIndex(index, length)
+        val array = this.array ?: throw IllegalStateException()
+
         return array[offset + index]
     }
 
     override operator fun set(index: Int, element: E): E {
-        checkIndex(index)
+        AbstractList.checkElementIndex(index, length)
+        val array = this.array ?: throw IllegalStateException()
+
         val old = array[offset + index]
         array[offset + index] = element
         return old
     }
 
     override fun contains(element: E): Boolean {
+        val array = this.array ?: throw IllegalStateException()
+
         var i = 0
         while (i < length) {
             if (array[offset + i] == element) return true
@@ -54,12 +61,14 @@ internal class ListBuilder<E> private constructor(
     override fun containsAll(elements: Collection<E>): Boolean {
         val it = elements.iterator()
         while (it.hasNext()) {
-            if (!contains(it.next()))return false
+            if (!contains(it.next())) return false
         }
         return true
     }
 
     override fun indexOf(element: E): Int {
+        val array = this.array ?: throw IllegalStateException()
+
         var i = 0
         while (i < length) {
             if (array[offset + i] == element) return i
@@ -69,6 +78,8 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun lastIndexOf(element: E): Int {
+        val array = this.array ?: throw IllegalStateException()
+
         var i = length - 1
         while (i >= 0) {
             if (array[offset + i] == element) return i
@@ -81,7 +92,7 @@ internal class ListBuilder<E> private constructor(
     override fun listIterator(): MutableListIterator<E> = Itr(this, 0)
 
     override fun listIterator(index: Int): MutableListIterator<E> {
-        checkInsertIndex(index)
+        AbstractList.checkPositionIndex(index, length)
         return Itr(this, index)
     }
 
@@ -91,7 +102,7 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun add(index: Int, element: E) {
-        checkInsertIndex(index)
+        AbstractList.checkPositionIndex(index, length)
         addAtInternal(offset + index, element)
     }
 
@@ -102,7 +113,7 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun addAll(index: Int, elements: Collection<E>): Boolean {
-        checkInsertIndex(index)
+        AbstractList.checkPositionIndex(index, length)
         val n = elements.size
         addAllInternal(offset + index, elements, n)
         return n > 0
@@ -113,7 +124,7 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun removeAt(index: Int): E {
-        checkIndex(index)
+        AbstractList.checkElementIndex(index, length)
         return removeAtInternal(offset + index)
     }
 
@@ -132,18 +143,19 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun subList(fromIndex: Int, toIndex: Int): MutableList<E> {
-        checkInsertIndex(fromIndex)
-        checkInsertIndexFrom(toIndex, fromIndex)
+        AbstractList.checkRangeIndexes(fromIndex, toIndex, length)
         return ListBuilder(array, offset + fromIndex, toIndex - fromIndex, this)
     }
 
     private fun ensureCapacity(minCapacity: Int) {
         if (backing != null) throw IllegalStateException() // just in case somebody casts subList to ListBuilder
+        val array = this.array ?: throw IllegalStateException()
+
         if (minCapacity > array.size) {
             var newSize = array.size * 3 / 2
             if (minCapacity > newSize)
                 newSize = minCapacity
-            array = array.copyOfUninitializedElements(newSize)
+            this.array = array.copyOfUninitializedElements(newSize)
         }
     }
 
@@ -153,19 +165,13 @@ internal class ListBuilder<E> private constructor(
     }
 
     override fun hashCode(): Int {
-        var result = 1
-        var i = 0
-        while (i < length) {
-            val nextElement = array[offset + i]
-            val nextHash = if (nextElement != null) nextElement.hashCode() else 0
-            result = result * 31 + nextHash
-            i++
-        }
-        return result
+        val array = this.array ?: throw IllegalStateException()
+        return array.subarrayContentHashCode(offset, length)
     }
 
     override fun toString(): String {
-        return this.array.subarrayContentToString(offset, length)
+        val array = this.array ?: throw IllegalStateException()
+        return array.subarrayContentToString(offset, length)
     }
 
     // ---------------------------- private ----------------------------
@@ -174,30 +180,14 @@ internal class ListBuilder<E> private constructor(
         ensureCapacity(length + n)
     }
 
-    private fun checkIndex(index: Int) {
-        if (index < 0 || index >= length) throw IndexOutOfBoundsException()
-    }
-
-    private fun checkInsertIndex(index: Int) {
-        if (index < 0 || index > length) throw IndexOutOfBoundsException()
-    }
-
-    private fun checkInsertIndexFrom(index: Int, fromIndex: Int) {
-        if (index < fromIndex || index > length) throw IndexOutOfBoundsException()
-    }
-
     private fun contentEquals(other: List<*>): Boolean {
-        if (length != other.size) return false
-        var i = 0
-        while (i < length) {
-            if (array[offset + i] != other[i]) return false
-            i++
-        }
-        return true
+        val array = this.array ?: throw IllegalStateException()
+        return array.subarrayContentEquals(offset, length, other)
     }
 
     private fun insertAtInternal(i: Int, n: Int) {
         ensureExtraCapacity(n)
+        val array = this.array ?: throw IllegalStateException()
         array.copyInto(array, startIndex = i, endIndex = offset + length, destinationOffset = i + n)
         length += n
     }
@@ -205,10 +195,11 @@ internal class ListBuilder<E> private constructor(
     private fun addAtInternal(i: Int, element: E) {
         if (backing != null) {
             backing.addAtInternal(i, element)
-            array = backing.array
+            this.array = backing.array
             length++
         } else {
             insertAtInternal(i, 1)
+            val array = this.array ?: throw IllegalStateException()
             array[i] = element
         }
     }
@@ -216,10 +207,12 @@ internal class ListBuilder<E> private constructor(
     private fun addAllInternal(i: Int, elements: Collection<E>, n: Int) {
         if (backing != null) {
             backing.addAllInternal(i, elements, n)
-            array = backing.array
+            this.array = backing.array
             length += n
         } else {
             insertAtInternal(i, n)
+            val array = this.array ?: throw IllegalStateException()
+
             var j = 0
             val it = elements.iterator()
             while (j < n) {
@@ -235,6 +228,8 @@ internal class ListBuilder<E> private constructor(
             length--
             return old
         } else {
+            val array = this.array ?: throw IllegalStateException()
+
             val old = array[i]
             array.copyInto(array, startIndex = i + 1, endIndex = offset + length, destinationOffset = i)
             array.resetAt(offset + length - 1)
@@ -247,6 +242,8 @@ internal class ListBuilder<E> private constructor(
         if (backing != null) {
             backing.removeRangeInternal(rangeOffset, rangeLength)
         } else {
+            val array = this.array ?: throw IllegalStateException()
+
             array.copyInto(array, startIndex = rangeOffset + rangeLength, endIndex = length, destinationOffset = rangeOffset)
             array.resetRange(fromIndex = length - rangeLength, toIndex = length)
         }
@@ -260,6 +257,8 @@ internal class ListBuilder<E> private constructor(
             length -= removed
             return removed
         } else {
+            val array = this.array ?: throw IllegalStateException()
+
             var i = 0
             var j = 0
             while (i < rangeLength) {
@@ -296,19 +295,23 @@ internal class ListBuilder<E> private constructor(
 
         override fun previous(): E {
             if (index <= 0) throw NoSuchElementException()
+            val array = list.array ?: throw IllegalStateException()
+
             lastIndex = --index
-            return list.array[list.offset + lastIndex]
+            return array[list.offset + lastIndex]
         }
 
         override fun next(): E {
             if (index >= list.length) throw NoSuchElementException()
+            val array = list.array ?: throw IllegalStateException()
+
             lastIndex = index++
-            return list.array[list.offset + lastIndex]
+            return array[list.offset + lastIndex]
         }
 
         override fun set(element: E) {
-            list.checkIndex(lastIndex)
-            list.array[list.offset + lastIndex] = element
+            check(lastIndex != -1) { "Call next() or previous() before replacing element from the iterator." }
+            list[lastIndex] = element
         }
 
         override fun add(element: E) {
@@ -375,6 +378,23 @@ private class ImmutableList<E>(
         return ImmutableList(toIndex - fromIndex, array, offset + fromIndex)
     }
 
+    override fun equals(other: Any?): Boolean {
+        return other === this ||
+                (other is List<*>) && contentEquals(other)
+    }
+
+    override fun hashCode(): Int {
+        return array.subarrayContentHashCode(offset, size)
+    }
+
+    override fun toString(): String {
+        return array.subarrayContentToString(offset, size)
+    }
+
+    private fun contentEquals(other: List<*>): Boolean {
+        return array.subarrayContentEquals(offset, size, other)
+    }
+
     private class Itr<E> : ListIterator<E> {
         private val list: ImmutableList<E>
         private var index: Int
@@ -403,12 +423,13 @@ private class ImmutableList<E>(
 }
 
 internal fun <E> arrayOfUninitializedElements(size: Int): Array<E> {
+    require(size >= 0) { "capacity must be non-negative." }
     @Suppress("UNCHECKED_CAST")
     return arrayOfNulls<Any?>(size) as Array<E>
 }
 
 @kotlin.internal.InlineOnly
-internal inline fun <T> Array<out T>.subarrayContentToString(offset: Int, length: Int): String {
+private inline fun <T> Array<out T>.subarrayContentToString(offset: Int, length: Int): String {
     val sb = StringBuilder(2 + length * 3)
     sb.append("[")
     var i = 0
@@ -419,6 +440,29 @@ internal inline fun <T> Array<out T>.subarrayContentToString(offset: Int, length
     }
     sb.append("]")
     return sb.toString()
+}
+
+@kotlin.internal.InlineOnly
+private inline fun <T> Array<T>.subarrayContentHashCode(offset: Int, length: Int): Int {
+    var result = 1
+    var i = 0
+    while (i < length) {
+        val nextElement = this[offset + i]
+        result = result * 31 + nextElement.hashCode()
+        i++
+    }
+    return result
+}
+
+@kotlin.internal.InlineOnly
+private inline fun <T> Array<T>.subarrayContentEquals(offset: Int, length: Int, other: List<*>): Boolean {
+    if (length != other.size) return false
+    var i = 0
+    while (i < length) {
+        if (this[offset + i] != other[i]) return false
+        i++
+    }
+    return true
 }
 
 internal fun <T> Array<T>.copyOfUninitializedElements(newSize: Int): Array<T> {
