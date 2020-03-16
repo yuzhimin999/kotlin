@@ -2513,17 +2513,15 @@ public final class kotlin/collections/builders/SetBuilder : kotlin/collections/A
 	public fun <init> (I)V
 	public fun add (Ljava/lang/Object;)Z
 	public fun addAll (Ljava/util/Collection;)Z
+	public final fun build ()Ljava/util/Set;
 	public fun clear ()V
 	public fun contains (Ljava/lang/Object;)Z
 	public fun containsAll (Ljava/util/Collection;)Z
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBacking ()Lkotlin/collections/builders/MapBuilder;
 	public fun getSize ()I
 	public fun hashCode ()I
-	public fun isEmpty ()Z
 	public fun iterator ()Ljava/util/Iterator;
 	public fun remove (Ljava/lang/Object;)Z
-	public fun toString ()Ljava/lang/String;
 }
 
 public final class kotlin/collections/unsigned/UArraysKt {

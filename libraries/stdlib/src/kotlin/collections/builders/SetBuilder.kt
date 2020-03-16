@@ -5,63 +5,63 @@
 
 package kotlin.collections.builders
 
-@PublishedApi
-internal class SetBuilder<E> internal constructor(
-    val backing: MapBuilder<E, *>
+/*@PublishedApi
+internal */class SetBuilder<E> private constructor(
+    private var backing: LinkedHashSet<E>?
 ) : MutableSet<E>, AbstractMutableCollection<E>() {
 
-    constructor() : this(MapBuilder<E, Nothing>())
+    constructor() : this(LinkedHashSet<E>())
 
-    constructor(initialCapacity: Int) : this(MapBuilder<E, Nothing>(initialCapacity))
+    constructor(initialCapacity: Int) : this(LinkedHashSet<E>(initialCapacity))
 
+    fun build(): Set<E> {
+        val backing = this.backing ?: throw IllegalStateException()
+        this.backing = null
+        return ImmutableSet(backing)
+    }
+
+    override val size: Int
+        get() = (backing ?: throw IllegalStateException()).size
+
+    override fun contains(element: E): Boolean =
+        (backing ?: throw IllegalStateException()).contains(element)
+
+    override fun clear() =
+        (backing ?: throw IllegalStateException()).clear()
+
+    override fun add(element: E): Boolean =
+        (backing ?: throw IllegalStateException()).add(element)
+
+    override fun remove(element: E): Boolean =
+        (backing ?: throw IllegalStateException()).remove(element)
+
+    override fun iterator(): MutableIterator<E> =
+        (backing ?: throw IllegalStateException()).iterator()
+
+    override fun containsAll(elements: Collection<E>): Boolean =
+        (backing ?: throw IllegalStateException()).containsAll(elements)
+
+    override fun addAll(elements: Collection<E>): Boolean =
+        (backing ?: throw IllegalStateException()).addAll(elements)
+
+    override fun equals(other: Any?): Boolean =
+        (backing ?: throw IllegalStateException()) == other
+
+    override fun hashCode(): Int =
+        (backing ?: throw IllegalStateException()).hashCode()
+}
+
+private class ImmutableSet<E>(
+    private val backing: LinkedHashSet<E>
+) : Set<E>, AbstractCollection<E>() {
     override val size: Int get() = backing.size
-    override fun isEmpty(): Boolean = backing.isEmpty()
-    override fun contains(element: E): Boolean = backing.containsKey(element)
-    override fun clear() = backing.clear()
-    override fun add(element: E): Boolean = backing.addKey(element) >= 0
-    override fun remove(element: E): Boolean = backing.removeKey(element) >= 0
-    override fun iterator(): MutableIterator<E> = backing.keysIterator()
+    override fun contains(element: E): Boolean = backing.contains(element)
+    override fun containsAll(elements: Collection<E>): Boolean = backing.containsAll(elements)
+    override fun iterator(): Iterator<E> = backing.iterator()
 
-    override fun containsAll(elements: Collection<E>): Boolean {
-        val it = elements.iterator()
-        while (it.hasNext()) {
-            if (!contains(it.next()))
-                return false
-        }
-        return true
-    }
-
-    override fun addAll(elements: Collection<E>): Boolean {
-        val it = elements.iterator()
-        var updated = false
-        while (it.hasNext()) {
-            if (add(it.next()))
-                updated = true
-        }
-        return updated
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return other === this ||
-                (other is Set<*>) &&
-                contentEquals(
-                    @Suppress("UNCHECKED_CAST") (other as Set<E>))
-    }
-
-    override fun hashCode(): Int {
-        var result = 0
-        val it = iterator()
-        while (it.hasNext()) {
-            result += it.next().hashCode()
-        }
-        return result
-    }
-
-    override fun toString(): String = collectionToString()
-
-    // ---------------------------- private ----------------------------
-
-    private fun contentEquals(other: Set<E>): Boolean = size == other.size && containsAll(other)
+    override fun hashCode(): Int = backing.hashCode()
+    override fun equals(other: Any?): Boolean = backing == other
+    override fun toString(): String = backing.toString()
 }
 
 internal fun <E> Collection<E>.collectionToString(): String {
