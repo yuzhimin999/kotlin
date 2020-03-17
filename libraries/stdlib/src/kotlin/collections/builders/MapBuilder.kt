@@ -7,20 +7,21 @@ package kotlin.collections.builders
 
 @PublishedApi
 internal class MapBuilder<K, V> private constructor(
+    private var isBuilt: Boolean,
     private var keysArray: Array<K>,
     private var valuesArray: Array<V>?, // allocated only when actually used, always null in pure HashSet
     private var presenceArray: IntArray,
     private var hashArray: IntArray,
     private var maxProbeDistance: Int,
-    private var length: Int
+    private var length: Int,
+    private var _size: Int
 ) : MutableMap<K, V> {
     private var hashShift: Int = computeShift(hashSize)
 
-    private var _size: Int = 0
     override val size: Int
         get() = _size
 
-    private var keysView: SetBuilder<K>? = null
+    private var keysView: HashMapKeys<K>? = null
     private var valuesView: HashMapValues<V>? = null
     private var entriesView: HashMapEntrySet<K, V>? = null
 
@@ -29,29 +30,61 @@ internal class MapBuilder<K, V> private constructor(
     constructor() : this(INITIAL_CAPACITY)
 
     constructor(initialCapacity: Int) : this(
+        false,
         arrayOfUninitializedElements(initialCapacity),
         null,
         IntArray(initialCapacity),
         IntArray(computeHashSize(initialCapacity)),
         INITIAL_MAX_PROBE_DISTANCE,
-        0)
+        0,
+        0
+    )
 
-    override fun isEmpty(): Boolean = _size == 0
-    override fun containsKey(key: K): Boolean = findKey(key) >= 0
-    override fun containsValue(value: V): Boolean = findValue(value) >= 0
+    fun build(): Map<K, V> {
+        if (isBuilt) throw IllegalStateException()
+        isBuilt = true
+        return MapBuilder(
+            false,
+            keysArray,
+            valuesArray,
+            presenceArray,
+            hashArray,
+            maxProbeDistance,
+            length,
+            _size
+        )
+    }
+
+    override fun isEmpty(): Boolean {
+        if (isBuilt) throw IllegalStateException()
+        return _size == 0
+    }
+
+    override fun containsKey(key: K): Boolean {
+        if (isBuilt) throw IllegalStateException()
+        return findKey(key) >= 0
+    }
+
+    override fun containsValue(value: V): Boolean {
+        if (isBuilt) throw IllegalStateException()
+        return findValue(value) >= 0
+    }
 
 
     operator fun set(key: K, value: V): Unit {
+        if (isBuilt) throw IllegalStateException()
         put(key, value)
     }
 
     override operator fun get(key: K): V? {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(key)
         if (index < 0) return null
         return valuesArray!![index]
     }
 
     override fun put(key: K, value: V): V? {
+        if (isBuilt) throw IllegalStateException()
         val index = addKey(key)
         val valuesArray = allocateValuesArray()
         if (index < 0) {
@@ -65,10 +98,12 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override fun putAll(from: Map<out K, V>) {
+        if (isBuilt) throw IllegalStateException()
         putAllEntries(from.entries)
     }
 
     override fun remove(key: K): V? {
+        if (isBuilt) throw IllegalStateException()
         val index = removeKey(key)
         if (index < 0) return null
         val valuesArray = valuesArray!!
@@ -78,6 +113,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override fun clear() {
+        if (isBuilt) throw IllegalStateException()
         // O(length) implementation for hashArray cleanup
         for (i in 0..length - 1) {
             val hash = presenceArray[i]
@@ -93,15 +129,17 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override val keys: MutableSet<K> get() {
+        if (isBuilt) throw IllegalStateException()
         val cur = keysView
         return if (cur == null) {
-            val new = SetBuilder(this)
+            val new = HashMapKeys(this)
             keysView = new
             new
         } else cur
     }
 
     override val values: MutableCollection<V> get() {
+        if (isBuilt) throw IllegalStateException()
         val cur = valuesView
         return if (cur == null) {
             val new = HashMapValues(this)
@@ -111,6 +149,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override val entries: MutableSet<MutableMap.MutableEntry<K, V>> get() {
+        if (isBuilt) throw IllegalStateException()
         val cur = entriesView
         return if (cur == null) {
             val new = HashMapEntrySet(this)
@@ -120,12 +159,14 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override fun equals(other: Any?): Boolean {
+        if (isBuilt) throw IllegalStateException()
         return other === this ||
                 (other is Map<*, *>) &&
                 contentEquals(other)
     }
 
     override fun hashCode(): Int {
+        if (isBuilt) throw IllegalStateException()
         var result = 0
         val it = entriesIterator()
         while (it.hasNext()) {
@@ -135,6 +176,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     override fun toString(): String {
+        if (isBuilt) throw IllegalStateException()
         val sb = StringBuilder(2 + _size * 3)
         sb.append("{")
         var i = 0
@@ -253,6 +295,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun addKey(key: K): Int {
+        if (isBuilt) throw IllegalStateException()
         retry@ while (true) {
             var hash = hash(key)
             // put is allowed to grow maxProbeDistance with some limits (resize hash on reaching limits)
@@ -286,6 +329,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun removeKey(key: K): Int {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(key)
         if (index < 0) return TOMBSTONE
         removeKeyAt(index)
@@ -350,12 +394,14 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun containsEntry(entry: Map.Entry<K, V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(entry.key)
         if (index < 0) return false
         return valuesArray!![index] == entry.value
     }
 
     internal fun getEntry(entry: Map.Entry<K, V>): MutableMap.MutableEntry<K, V>? {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(entry.key)
         return if (index < 0 || valuesArray!![index] != entry.value) {
             null
@@ -365,9 +411,10 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun getKey(key: K): K? {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(key)
         return if (index >= 0) {
-            keysArray[index]!!
+            keysArray[index]!!  // test the case when key is null
         } else {
             null
         }
@@ -376,6 +423,7 @@ internal class MapBuilder<K, V> private constructor(
     private fun contentEquals(other: Map<*, *>): Boolean = _size == other.size && containsAllEntries(other.entries)
 
     internal fun containsAllEntries(m: Collection<*>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val it = m.iterator()
         while (it.hasNext()) {
             val entry = it.next()
@@ -391,6 +439,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun putEntry(entry: Map.Entry<K, V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val index = addKey(entry.key)
         val valuesArray = allocateValuesArray()
         if (index >= 0) {
@@ -406,6 +455,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun putAllEntries(from: Collection<Map.Entry<K, V>>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         if (from.isEmpty()) return false
         ensureExtraCapacity(from.size)
         val it = from.iterator()
@@ -418,6 +468,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun removeEntry(entry: Map.Entry<K, V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val index = findKey(entry.key)
         if (index < 0) return false
         if (valuesArray!![index] != entry.value) return false
@@ -426,6 +477,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun removeAllEntries(elements: Collection<Map.Entry<K, V>>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         if (elements.isEmpty()) return false
         val it = entriesIterator()
         var updated = false
@@ -439,6 +491,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun retainAllEntries(elements: Collection<Map.Entry<K, V>>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val it = entriesIterator()
         var updated = false
         while (it.hasNext()) {
@@ -451,6 +504,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun containsAllValues(elements: Collection<V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val it = elements.iterator()
         while (it.hasNext()) {
             if (!containsValue(it.next()))
@@ -460,6 +514,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun removeValue(element: V): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val index = findValue(element)
         if (index < 0) return false
         removeKeyAt(index)
@@ -467,6 +522,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun removeAllValues(elements: Collection<V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val it = valuesIterator()
         var updated = false
         while (it.hasNext()) {
@@ -479,6 +535,7 @@ internal class MapBuilder<K, V> private constructor(
     }
 
     internal fun retainAllValues(elements: Collection<V>): Boolean {
+        if (isBuilt) throw IllegalStateException()
         val it = valuesIterator()
         var updated = false
         while (it.hasNext()) {
@@ -490,9 +547,20 @@ internal class MapBuilder<K, V> private constructor(
         return updated
     }
 
-    internal fun keysIterator() = KeysItr(this)
-    internal fun valuesIterator() = ValuesItr(this)
-    internal fun entriesIterator() = EntriesItr(this)
+    internal fun keysIterator(): KeysItr<K, V> {
+        if (isBuilt) throw IllegalStateException()
+        return KeysItr(this)
+    }
+
+    internal fun valuesIterator(): ValuesItr<K, V> {
+        if (isBuilt) throw IllegalStateException()
+        return ValuesItr(this)
+    }
+
+    internal fun entriesIterator(): EntriesItr<K, V> {
+        if (isBuilt) throw IllegalStateException()
+        return EntriesItr(this)
+    }
 
     private companion object {
         const val MAGIC = -1640531527 // 2654435769L.toInt(), golden ratio
@@ -607,6 +675,60 @@ internal class MapBuilder<K, V> private constructor(
 
         override fun toString(): String = "$key=$value"
     }
+}
+
+internal class HashMapKeys<K> internal constructor(
+    private var backing: MapBuilder<K, *>
+) : MutableSet<K>, AbstractMutableCollection<K>() {
+
+    override val size: Int get() = backing.size
+    override fun isEmpty(): Boolean = backing.isEmpty()
+    override fun contains(element: K): Boolean = backing.containsKey(element)
+    override fun clear() = backing.clear()
+    override fun add(element: K): Boolean = backing.addKey(element) >= 0
+    override fun remove(element: K): Boolean = backing.removeKey(element) >= 0
+    override fun iterator(): MutableIterator<K> = backing.keysIterator()
+
+    override fun containsAll(elements: Collection<K>): Boolean {
+        val it = elements.iterator()
+        while (it.hasNext()) {
+            if (!contains(it.next()))
+                return false
+        }
+        return true
+    }
+
+    override fun addAll(elements: Collection<K>): Boolean {
+        val it = elements.iterator()
+        var updated = false
+        while (it.hasNext()) {
+            if (add(it.next()))
+                updated = true
+        }
+        return updated
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other === this ||
+                (other is Set<*>) &&
+                contentEquals(
+                    @Suppress("UNCHECKED_CAST") (other as Set<K>))
+    }
+
+    override fun hashCode(): Int {
+        var result = 0
+        val it = iterator()
+        while (it.hasNext()) {
+            result += it.next().hashCode()
+        }
+        return result
+    }
+
+    override fun toString(): String = collectionToString()
+
+    // ---------------------------- private ----------------------------
+
+    private fun contentEquals(other: Set<K>): Boolean = size == other.size && containsAll(other)
 }
 
 internal class HashMapValues<V> internal constructor(

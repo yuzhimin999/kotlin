@@ -2486,6 +2486,7 @@ public final class kotlin/collections/builders/MapBuilder : java/util/Map, kotli
 	public static final field TOMBSTONE I
 	public fun <init> ()V
 	public fun <init> (I)V
+	public final fun build ()Ljava/util/Map;
 	public fun clear ()V
 	public fun containsKey (Ljava/lang/Object;)Z
 	public fun containsValue (Ljava/lang/Object;)Z
