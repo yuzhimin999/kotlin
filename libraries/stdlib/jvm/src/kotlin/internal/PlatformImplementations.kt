@@ -20,10 +20,11 @@ internal open class PlatformImplementations {
 
         init {
             val throwableClass = Throwable::class.java
-            addSuppressed = throwableClass.methods.find {
+            val throwableMethods = throwableClass.methods
+            addSuppressed = throwableMethods.find {
                 it.name == "addSuppressed" && it.parameterTypes.singleOrNull() == throwableClass
             }
-            getSuppressed = throwableClass.methods.find { it.name == "getSuppressed" }
+            getSuppressed = throwableMethods.find { it.name == "getSuppressed" }
         }
     }
 
