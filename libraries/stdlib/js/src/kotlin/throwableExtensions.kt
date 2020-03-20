@@ -61,7 +61,7 @@ private class ExceptionTraceBuilder {
 
         var cause = this.cause
         while (cause != null) {
-            cause.dumpSelfTrace(indent, "Caused by: ")
+            cause.dumpSelfTrace(indent, "Caused by: ") || return
             cause = cause.cause
         }
     }
