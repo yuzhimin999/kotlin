@@ -1621,6 +1621,11 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
                 runTest("compiler/testData/codegen/box/callableReference/equality/simpleEquality.kt");
             }
 
+            @TestMetadata("varargAsArrayWithDefaults.kt")
+            public void testVarargAsArrayWithDefaults() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/varargAsArrayWithDefaults.kt");
+            }
+
             @TestMetadata("varargWithDefaults.kt")
             public void testVarargWithDefaults() throws Exception {
                 runTest("compiler/testData/codegen/box/callableReference/equality/varargWithDefaults.kt");
