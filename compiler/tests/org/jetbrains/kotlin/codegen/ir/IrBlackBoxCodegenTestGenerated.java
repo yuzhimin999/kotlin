@@ -2191,9 +2191,24 @@ public class IrBlackBoxCodegenTestGenerated extends AbstractIrBlackBoxCodegenTes
                 runTest("compiler/testData/codegen/box/callableReference/equality/coercionToUnit.kt");
             }
 
+            @TestMetadata("coercionToUnitWithDefaults.kt")
+            public void testCoercionToUnitWithDefaults() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/coercionToUnitWithDefaults.kt");
+            }
+
+            @TestMetadata("coercionToUnitWithVararg.kt")
+            public void testCoercionToUnitWithVararg() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/coercionToUnitWithVararg.kt");
+            }
+
             @TestMetadata("simpleEquality.kt")
             public void testSimpleEquality() throws Exception {
                 runTest("compiler/testData/codegen/box/callableReference/equality/simpleEquality.kt");
+            }
+
+            @TestMetadata("varargWithDefaults.kt")
+            public void testVarargWithDefaults() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/varargWithDefaults.kt");
             }
         }
 

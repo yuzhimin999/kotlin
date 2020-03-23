@@ -15,52 +15,52 @@ class V {
     fun target(vararg x: String) {}
 }
 
-private fun captureTwoParams(f: (V, String, String) -> Unit): Any = f
-private fun captureOneParam(f: (V, String) -> Unit): Any = f
-private fun captureNoParams(f: (V) -> Unit): Any = f
+private fun captureVararg2(f: (V, String, String) -> Unit): Any = f
+private fun captureVararg1(f: (V, String) -> Unit): Any = f
+private fun captureVararg0(f: (V) -> Unit): Any = f
 private fun captureVarargAsArray(f: (V, Array<String>) -> Unit): Any = f
 
-private fun captureTwoParamsBound(f: (String, String) -> Unit): Any = f
-private fun captureOneParamBound(f: (String) -> Unit): Any = f
-private fun captureNoParamsBound(f: () -> Unit): Any = f
+private fun captureVararg2Bound(f: (String, String) -> Unit): Any = f
+private fun captureVararg1Bound(f: (String) -> Unit): Any = f
+private fun captureVararg0Bound(f: () -> Unit): Any = f
 private fun captureVarargAsArrayBound(f: (Array<String>) -> Unit): Any = f
 
 fun box(): String {
     val v0 = V()
 
-    checkEqual(captureTwoParams(V::target), captureTwoParams(V::target))
-    checkEqual(captureOneParam(V::target), captureOneParam(V::target))
-    checkEqual(captureNoParams(V::target), captureNoParams(V::target))
-    checkEqual(captureNoParams(V::target), captureNoParamsFromOtherFile())
+    checkEqual(captureVararg2(V::target), captureVararg2(V::target))
+    checkEqual(captureVararg1(V::target), captureVararg1(V::target))
+    checkEqual(captureVararg0(V::target), captureVararg0(V::target))
+    checkEqual(captureVararg0(V::target), captureVararg0FromOtherFile())
     checkEqual(captureVarargAsArray(V::target), captureVarargAsArrayFromOtherFile())
 
-    checkEqual(captureTwoParamsBound(v0::target), captureTwoParamsBound(v0::target))
-    checkEqual(captureOneParamBound(v0::target), captureOneParamBound(v0::target))
-    checkEqual(captureNoParamsBound(v0::target), captureNoParamsBound(v0::target))
-    checkEqual(captureNoParamsBound(v0::target), captureNoParamsBoundFromOtherFile(v0))
+    checkEqual(captureVararg2Bound(v0::target), captureVararg2Bound(v0::target))
+    checkEqual(captureVararg1Bound(v0::target), captureVararg1Bound(v0::target))
+    checkEqual(captureVararg0Bound(v0::target), captureVararg0Bound(v0::target))
+    checkEqual(captureVararg0Bound(v0::target), captureVararg0BoundFromOtherFile(v0))
     checkEqual(captureVarargAsArrayBound(v0::target), captureVarargAsArrayBoundFromOtherFile(v0))
 
 
-    checkNotEqual(captureTwoParams(V::target), captureNoParams(V::target))
-    checkNotEqual(captureTwoParamsBound(v0::target), captureNoParamsBound(v0::target))
+    checkNotEqual(captureVararg2(V::target), captureVararg0(V::target))
+    checkNotEqual(captureVararg2Bound(v0::target), captureVararg0Bound(v0::target))
 
-    checkNotEqual(captureTwoParams(V::target), captureVarargAsArray(V::target))
-    checkNotEqual(captureOneParam(V::target), captureVarargAsArray(V::target))
-    checkNotEqual(captureNoParams(V::target), captureVarargAsArray(V::target))
-    checkNotEqual(captureOneParamBound(v0::target), captureVarargAsArrayBound(v0::target))
-    checkNotEqual(captureOneParamBound(v0::target), captureVarargAsArrayBoundFromOtherFile(v0))
+    checkNotEqual(captureVararg2(V::target), captureVarargAsArray(V::target))
+    checkNotEqual(captureVararg1(V::target), captureVarargAsArray(V::target))
+    checkNotEqual(captureVararg0(V::target), captureVarargAsArray(V::target))
+    checkNotEqual(captureVararg1Bound(v0::target), captureVarargAsArrayBound(v0::target))
+    checkNotEqual(captureVararg1Bound(v0::target), captureVarargAsArrayBoundFromOtherFile(v0))
 
     return "OK"
 }
 
 // FILE: fromOtherFile.kt
 
-private fun captureNoParams(f: (V) -> Unit): Any = f
-private fun captureNoParamsBound(f: () -> Unit): Any = f
+private fun captureVararg0(f: (V) -> Unit): Any = f
+private fun captureVararg0Bound(f: () -> Unit): Any = f
 private fun captureVarargAsArray(f: (V, Array<String>) -> Unit): Any = f
 private fun captureVarargAsArrayBound(f: (Array<String>) -> Unit): Any = f
 
-fun captureNoParamsFromOtherFile(): Any = captureNoParams(V::target)
-fun captureNoParamsBoundFromOtherFile(v0: V): Any = captureNoParamsBound(v0::target)
+fun captureVararg0FromOtherFile(): Any = captureVararg0(V::target)
+fun captureVararg0BoundFromOtherFile(v0: V): Any = captureVararg0Bound(v0::target)
 fun captureVarargAsArrayFromOtherFile(): Any = captureVarargAsArray(V::target)
 fun captureVarargAsArrayBoundFromOtherFile(v0: V): Any = captureVarargAsArrayBound(v0::target)
