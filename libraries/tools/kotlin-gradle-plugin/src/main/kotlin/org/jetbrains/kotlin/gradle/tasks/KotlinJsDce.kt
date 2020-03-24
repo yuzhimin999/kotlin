@@ -91,7 +91,7 @@ open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJs
                 it.classpath = project.files(computedCompilerClasspath)
                 it.args = allArgs.toList()
                 it.main = K2JSDce::class.java.name
-            }
+            }.rethrowFailure()
         } else {
             val exitCode = runToolInSeparateProcess(
                 allArgs, K2JSDce::class.java.name, computedCompilerClasspath,
