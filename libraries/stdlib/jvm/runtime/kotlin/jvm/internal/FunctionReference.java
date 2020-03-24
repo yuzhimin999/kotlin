@@ -109,7 +109,8 @@ public class FunctionReference extends CallableReference implements FunctionBase
 
     @Override
     public int hashCode() {
-        return ((getOwner() == null ? 0 : getOwner().hashCode() * 31) + getName().hashCode()) * 31 + getSignature().hashCode();
+        return (((getOwner() == null ? 0 : getOwner().hashCode() * 31) + getName().hashCode()) * 31 + getSignature().hashCode()) * 31 +
+               Integer.valueOf(flags).hashCode();
     }
 
     @Override
