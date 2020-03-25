@@ -251,8 +251,6 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
             val mppModel = resolverCtx.getMppModel(gradleModule)
             if (mppModel == null || externalProject == null) return
 
-            mainModuleNode.kotlinNativeHome = mppModel.kotlinNativeHome
-
             val jdkName = gradleModule.jdkNameIfAny
 
             // save artefacts locations.
@@ -285,7 +283,7 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
 
             val sourceSetToTestTasks = calculateTestTasks(mppModel, gradleModule, resolverCtx)
 
-            val sourceSetToCompilationData = LinkedHashMap<KotlinSourceSet, MutableSet<GradleSourceSetData>>()
+            val sourceSetToCompilationData = LinkedHashMap<String, MutableSet<GradleSourceSetData>>()
             for (target in mppModel.targets) {
                 if (delegateToAndroidPlugin(target)) continue
                 if (target.name == KotlinTarget.METADATA_TARGET_NAME) continue
@@ -341,10 +339,15 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
 
                     if (compilation.platform == KotlinPlatform.JVM || compilation.platform == KotlinPlatform.ANDROID) {
                         compilationData.targetCompatibility = (kotlinSourceSet.compilerArguments as? K2JVMCompilerArguments)?.jvmTarget
+                    } else if (compilation.platform == KotlinPlatform.NATIVE) {
+                        compilationData.konanTargets = setOf(compilation.nativeExtensions!!.konanTarget)
                     }
 
                     for (sourceSet in compilation.sourceSets) {
-                        sourceSetToCompilationData.getOrPut(sourceSet) { LinkedHashSet() } += compilationData
+                        sourceSetToCompilationData.getOrPut(sourceSet.name) { LinkedHashSet() } += compilationData
+                        for (dependentSourceSetName in sourceSet.dependsOnSourceSets) {
+                            sourceSetToCompilationData.getOrPut(dependentSourceSetName) { LinkedHashSet() } += compilationData
+                        }
                     }
 
                     val compilationDataNode =
@@ -390,9 +393,18 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
 
                     it.ideModuleGroup = moduleGroup
                     it.sdkName = jdkName
-                    it.targetCompatibility = sourceSetToCompilationData[sourceSet]
-                        ?.mapNotNull { it.targetCompatibility }
-                        ?.minWith(VersionComparatorUtil.COMPARATOR)
+
+                    sourceSetToCompilationData[sourceSet.name]?.let { compilationDataRecords ->
+                        it.targetCompatibility = compilationDataRecords
+                            .mapNotNull { compilationData -> compilationData.targetCompatibility }
+                            .minWith(VersionComparatorUtil.COMPARATOR)
+
+                        if (sourceSet.actualPlatforms.getSinglePlatform() == KotlinPlatform.NATIVE) {
+                            it.konanTargets = compilationDataRecords
+                                .flatMap { compilationData -> compilationData.konanTargets ?: emptySet() }
+                                .toSet()
+                        }
+                    }
                 }
 
                 val kotlinSourceSet = createSourceSetInfo(sourceSet, gradleModule, resolverCtx) ?: continue
@@ -414,6 +426,7 @@ open class KotlinMPPGradleProjectResolver : AbstractProjectResolverExtensionComp
                 }
             }
 
+            mainModuleNode.kotlinNativeHome = mppModel.kotlinNativeHome
             mainModuleNode.coroutines = mppModel.extraFeatures.coroutinesState
             mainModuleNode.isHmpp = mppModel.extraFeatures.isHMPPEnabled
             //TODO improve passing version of used multiplatform

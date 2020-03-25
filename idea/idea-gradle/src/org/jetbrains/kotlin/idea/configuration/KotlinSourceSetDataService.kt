@@ -30,9 +30,12 @@ import org.jetbrains.kotlin.idea.inspections.gradle.findAll
 import org.jetbrains.kotlin.idea.inspections.gradle.findKotlinPluginVersion
 import org.jetbrains.kotlin.idea.platform.IdePlatformKindTooling
 import org.jetbrains.kotlin.idea.roots.migrateNonJvmSourceFolders
+import org.jetbrains.kotlin.konan.target.HostManager
 import org.jetbrains.kotlin.platform.TargetPlatform
 import org.jetbrains.kotlin.platform.impl.JvmIdePlatformKind
+import org.jetbrains.kotlin.platform.impl.NativeIdePlatformKind
 import org.jetbrains.kotlin.platform.jvm.JvmPlatforms
+import org.jetbrains.kotlin.platform.konan.NativePlatforms
 import org.jetbrains.plugins.gradle.model.data.BuildScriptClasspathData
 import org.jetbrains.plugins.gradle.model.data.GradleSourceSetData
 
@@ -105,8 +108,13 @@ class KotlinSourceSetDataService : AbstractProjectDataService<GradleSourceSetDat
                 .flatMap {
                     when (it) {
                         is JvmIdePlatformKind -> {
-                            val target = JvmTarget.fromString(moduleData.targetCompatibility ?: "") ?: JvmTarget.DEFAULT
-                            JvmPlatforms.jvmPlatformByTargetVersion(target).componentPlatforms
+                            val jvmTarget = JvmTarget.fromString(moduleData.targetCompatibility ?: "") ?: JvmTarget.DEFAULT
+                            JvmPlatforms.jvmPlatformByTargetVersion(jvmTarget).componentPlatforms
+                        }
+                        is NativeIdePlatformKind -> {
+                            val konanTargets = moduleData.konanTargets ?: setOf(HostManager.host.name)
+                            // TODO: initialize one or more KonanPlatforms with concrete konan targets, return one TargetPlatform
+                            NativePlatforms.defaultNativePlatform
                         }
                         else -> it.defaultPlatform.componentPlatforms
                     }
@@ -175,3 +183,12 @@ class KotlinSourceSetDataService : AbstractProjectDataService<GradleSourceSetDat
         }
     }
 }
+
+private const val KOTLIN_NATIVE_TARGETS_PROPERTY = "konanTargets"
+
+var ModuleData.konanTargets: Set<String>?
+    get() {
+        val value = getProperty(KOTLIN_NATIVE_TARGETS_PROPERTY)
+        return if (value != null && value.isNotEmpty()) value.split(',').toSet() else null
+    }
+    set(value) = setProperty(KOTLIN_NATIVE_TARGETS_PROPERTY, value?.joinToString(separator = ","))
