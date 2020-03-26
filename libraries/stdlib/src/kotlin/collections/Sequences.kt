@@ -8,6 +8,8 @@
 
 package kotlin.sequences
 
+import kotlin.random.Random
+
 /**
  * Given an [iterator] function constructs a [Sequence] that returns values through the [Iterator]
  * provided by that function.
@@ -108,6 +110,37 @@ public fun <T, R> Sequence<Pair<T, R>>.unzip(): Pair<List<T>, List<R>> {
     }
     return listT to listR
 }
+
+/**
+ * Returns a sequence that yields elements of this sequence randomly shuffled.
+ *
+ * Note that every iteration of the sequence returns elements in a different order.
+ *
+ * The operation is _intermediate_ and _stateful_.
+ */
+@SinceKotlin("1.4")
+public fun <T> Sequence<T>.shuffled(): Sequence<T> = shuffled(Random)
+
+/**
+ * Returns a sequence that yields elements of this sequence randomly shuffled
+ * using the specified [random] instance as the source of randomness.
+ *
+ * Note that every iteration of the sequence returns elements in a different order.
+ *
+ * The operation is _intermediate_ and _stateful_.
+ */
+@OptIn(ExperimentalStdlibApi::class)
+@SinceKotlin("1.4")
+public fun <T> Sequence<T>.shuffled(random: Random): Sequence<T> = sequence<T> {
+    val buffer = toCollection(ArrayDeque())
+    while (buffer.isNotEmpty()) {
+        val j = random.nextInt(buffer.size)
+        val first = buffer.removeFirst()
+        val value = if (j > 0) buffer.set(j - 1, first) else first
+        yield(value)
+    }
+}
+
 
 /**
  * A sequence that returns the values from the underlying [sequence] that either match or do not match
