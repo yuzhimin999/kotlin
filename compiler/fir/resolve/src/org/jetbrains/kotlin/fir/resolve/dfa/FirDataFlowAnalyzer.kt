@@ -160,10 +160,30 @@ abstract class FirDataFlowAnalyzer<FLOW : Flow>(
         enterNode.flow = enterNode.flow.fork()
     }
 
-    // ----------------------------------- Anonymous object -----------------------------------
+    // ----------------------------------- Classes -----------------------------------
 
-    fun exitAnonymousObject(anonymousObject: FirAnonymousObject) {
-        graphBuilder.exitAnonymousObject(anonymousObject).mergeIncomingFlow()
+    fun enterClass() {
+        graphBuilder.enterClass()
+    }
+
+    fun exitClass() {
+        graphBuilder.exitClass()
+    }
+
+    fun exitRegularClass(klass: FirRegularClass): ControlFlowGraph {
+        return graphBuilder.exitClass(klass)
+    }
+
+    fun exitLocalClass(klass: FirRegularClass): ControlFlowGraph {
+        val (node, controlFlowGraph) = graphBuilder.exitLocalClass(klass)
+        node.mergeIncomingFlow()
+        return controlFlowGraph
+    }
+
+    fun exitAnonymousObject(anonymousObject: FirAnonymousObject): ControlFlowGraph {
+        val (node, controlFlowGraph) = graphBuilder.exitAnonymousObject(anonymousObject)
+        node.mergeIncomingFlow()
+        return controlFlowGraph
     }
 
     // ----------------------------------- Property -----------------------------------
