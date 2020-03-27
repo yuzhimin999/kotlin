@@ -108,7 +108,9 @@ class IrSourceCompilerForInline(
         callDefault: Boolean,
         asmMethod: Method
     ): SMAPAndMethodNode {
-        assert(callableDescriptor == callee.symbol.descriptor.original) { "Expected $callableDescriptor got ${callee.descriptor.original}" }
+        assert(callableDescriptor == callee.symbol.descriptor.original) {
+            "Expected $callableDescriptor got ${callee.descriptor.original}"
+        }
         // Do not inline the generated state-machine, which was generated to support java interop of inline suspend functions.
         // Instead, find its $$forInline companion (they share the same attributeOwnerId), which is generated for the inliner to use.
         val forInlineFunction = if (callee.isSuspend)
