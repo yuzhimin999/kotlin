@@ -56,6 +56,8 @@ inline val FirMemberDeclaration.isFromEnumClass: Boolean get() = status.isFromEn
 inline val FirPropertyAccessor.modality get() = status.modality
 inline val FirPropertyAccessor.visibility get() = status.visibility
 
+inline val FirRegularClass.isLocal get() = symbol.classId.isLocal
+
 fun AbstractFirRegularClassBuilder.addDeclaration(declaration: FirDeclaration) {
     declarations += declaration
     if (companionObject == null && declaration is FirRegularClass && declaration.isCompanion) {
