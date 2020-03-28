@@ -20,13 +20,11 @@ import org.jetbrains.kotlin.builtins.*
 import org.jetbrains.kotlin.descriptors.annotations.Annotations
 import org.jetbrains.kotlin.resolve.calls.inference.ConstraintSystemBuilder
 import org.jetbrains.kotlin.resolve.calls.inference.components.NewTypeSubstitutor
-import org.jetbrains.kotlin.resolve.calls.inference.model.ArgumentConstraintPosition
-import org.jetbrains.kotlin.resolve.calls.inference.model.LHSArgumentConstraintPosition
-import org.jetbrains.kotlin.resolve.calls.inference.model.TypeVariableForLambdaReturnType
+import org.jetbrains.kotlin.resolve.calls.inference.components.TypeVariableDependencyInformationProvider
+import org.jetbrains.kotlin.resolve.calls.inference.model.*
 import org.jetbrains.kotlin.resolve.calls.model.*
-import org.jetbrains.kotlin.types.ErrorUtils
-import org.jetbrains.kotlin.types.UnwrappedType
-import org.jetbrains.kotlin.types.Variance
+import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.model.typeConstructor
 import org.jetbrains.kotlin.types.typeUtil.builtIns
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
@@ -53,6 +51,20 @@ fun resolveKtPrimitive(
     else -> unexpectedArgument(argument)
 }
 
+private fun NewConstraintSystemImpl.getExistingConstraintOnFunctionType(expectedType: KotlinType): KotlinType? {
+    notFixedTypeVariables[expectedType.constructor]?.constraints?.forEach {
+        if (it.kind == ConstraintKind.UPPER) {
+            val t = getExistingConstraintOnFunctionType(it.type as KotlinType)
+            if (t != null) {
+                return t
+            }
+        }
+        if (it.kind == ConstraintKind.LOWER && (it.type as KotlinType).isBuiltinFunctionalType) {
+            return it.type
+        }
+    }
+    return null
+}
 
 // if expected type isn't function type, then may be it is Function<R>, Any or just `T`
 private fun preprocessLambdaArgument(
@@ -99,6 +111,22 @@ private fun extraLambdaInfo(
     val returnType =
         argumentAsFunctionExpression?.returnType ?: expectedType?.arguments?.singleOrNull()?.type?.unwrap()?.takeIf { isFunctionSupertype }
         ?: typeVariable.defaultType
+
+    /*
+    val ft = (expectedType as? KotlinType)?.let { e -> (csBuilder as NewConstraintSystemImpl).getExistingConstraintOnFunctionType(e) }
+    val parameters = if (ft != null) {
+        ft.arguments.subList(0, ft.arguments.size - 1).map { it.type as UnwrappedType }
+    } else {
+        argument.parametersTypes?.mapIndexed { index, parameterType ->
+            if (parameterType != null) {
+                parameterType
+            } else {
+                diagnosticsHolder.addDiagnostic(NotEnoughInformationForLambdaParameter(argument, index))
+                ErrorUtils.createErrorType("<Unknown lambda parameter type>")
+            }
+        } ?: emptyList()
+    }
+     */
 
     val parameters = argument.parametersTypes?.mapIndexed { index, parameterType ->
         if (parameterType != null) {

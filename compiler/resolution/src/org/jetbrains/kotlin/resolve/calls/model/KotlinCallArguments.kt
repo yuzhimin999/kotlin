@@ -56,11 +56,11 @@ interface LambdaKotlinCallArgument : PostponableKotlinCallArgument {
      * parametersTypes == null means, that there is no declared arguments
      * null inside array means that this type is not declared explicitly
      */
-    val parametersTypes: Array<UnwrappedType?>?
+    var parametersTypes: Array<UnwrappedType?>?
 }
 
 interface FunctionExpression : LambdaKotlinCallArgument {
-    override val parametersTypes: Array<UnwrappedType?>
+    override var parametersTypes: Array<UnwrappedType?>?
 
     // null means that there function can not have receiver
     val receiverType: UnwrappedType?

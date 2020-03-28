@@ -3,7 +3,7 @@
 
 fun foo(i: Int) {}
 fun foo(s: String) {}
-fun <T> id(x: T): T = x
+fun <K> id(x: K): K = x
 fun <T> baz(x: T, y: T): T = TODO()
 
 fun test() {
@@ -21,4 +21,6 @@ fun test() {
     baz(id(::foo), id<(Int) -> Unit>(id(::foo)))
 
     baz(id { it.inv() }, id<(Int) -> Unit> { })
+    baz(id { x -> x.inv() }, id { x: Int -> })
+    baz(id { it.inv() }, id { x: Int -> })
 }
