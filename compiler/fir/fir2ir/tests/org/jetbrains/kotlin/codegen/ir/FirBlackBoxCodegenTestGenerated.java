@@ -14377,9 +14377,19 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
                 runTest("compiler/testData/codegen/box/jvm8/defaults/defaultArgs.kt");
             }
 
+            @TestMetadata("defaultArgsViaAnonymousObject.kt")
+            public void testDefaultArgsViaAnonymousObject() throws Exception {
+                runTest("compiler/testData/codegen/box/jvm8/defaults/defaultArgsViaAnonymousObject.kt");
+            }
+
             @TestMetadata("diamond.kt")
             public void testDiamond() throws Exception {
                 runTest("compiler/testData/codegen/box/jvm8/defaults/diamond.kt");
+            }
+
+            @TestMetadata("inheritedFunctionWithDefaultParameters.kt")
+            public void testInheritedFunctionWithDefaultParameters() throws Exception {
+                runTest("compiler/testData/codegen/box/jvm8/defaults/inheritedFunctionWithDefaultParameters.kt");
             }
 
             @TestMetadata("inline.kt")
@@ -14557,6 +14567,16 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
                 @TestMetadata("interfaceExtension.kt")
                 public void testInterfaceExtension() throws Exception {
                     runTest("compiler/testData/codegen/box/jvm8/defaults/allCompatibility/interfaceExtension.kt");
+                }
+
+                @TestMetadata("kt14243.kt")
+                public void testKt14243() throws Exception {
+                    runTest("compiler/testData/codegen/box/jvm8/defaults/allCompatibility/kt14243.kt");
+                }
+
+                @TestMetadata("kt14243_2.kt")
+                public void testKt14243_2() throws Exception {
+                    runTest("compiler/testData/codegen/box/jvm8/defaults/allCompatibility/kt14243_2.kt");
                 }
 
                 @TestMetadata("privateFunInInterface.kt")
@@ -14781,6 +14801,16 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
                 @TestMetadata("interfaceExtension.kt")
                 public void testInterfaceExtension() throws Exception {
                     runTest("compiler/testData/codegen/box/jvm8/defaults/noDefaultImpls/interfaceExtension.kt");
+                }
+
+                @TestMetadata("kt14243.kt")
+                public void testKt14243() throws Exception {
+                    runTest("compiler/testData/codegen/box/jvm8/defaults/noDefaultImpls/kt14243.kt");
+                }
+
+                @TestMetadata("kt14243_2.kt")
+                public void testKt14243_2() throws Exception {
+                    runTest("compiler/testData/codegen/box/jvm8/defaults/noDefaultImpls/kt14243_2.kt");
                 }
 
                 @TestMetadata("privateFunInInterface.kt")
@@ -27261,6 +27291,11 @@ public class FirBlackBoxCodegenTestGenerated extends AbstractFirBlackBoxCodegenT
 
         public void testAllFilesPresentInTraits() throws Exception {
             KotlinTestUtils.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/traits"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JVM_IR, true);
+        }
+
+        @TestMetadata("defaultImplCall.kt")
+        public void testDefaultImplCall() throws Exception {
+            runTest("compiler/testData/codegen/box/traits/defaultImplCall.kt");
         }
 
         @TestMetadata("diamondPropertyAccessors.kt")
