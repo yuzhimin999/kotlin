@@ -84,67 +84,64 @@ class KotlinConstraintSystemCompleter(
         }
     }
 
-    private fun Context.fixVariableRecusively(
-        type: List<KotlinType>,
-        topLevelAtoms: List<ResolvedAtom>,
-        completionMode: ConstraintSystemCompletionMode,
-        variablesSeen: MutableSet<KotlinType> = mutableSetOf()
+    private fun Context.fixVariablesInsideConstraints(
+        typeVariable: TypeVariableTypeConstructor,
+        topLevelAtoms: List<ResolvedAtom>
     ): Boolean {
-        var isFixed = true
+        val notFixedTypeVariable = notFixedTypeVariables[typeVariable] ?: return true
 
-        for (it in type) {
-            if (it.constructor !is TypeVariableTypeConstructor && it.arguments.isNotEmpty()) {
-                val res = fixVariableRecusively(it.arguments.map { it.type }, topLevelAtoms, completionMode)
-                isFixed = isFixed && res
-            } else if (it.constructor is TypeVariableTypeConstructor && notFixedTypeVariables.containsKey(it.constructor)) {
-                val notFixedTypeVariable = notFixedTypeVariables.getValue(it.constructor)
-                val constraints = mutableListOf<Constraint>().apply { addAll(notFixedTypeVariable.constraints) }
+        return notFixedTypeVariable.constraints.toMutableList().map { constraint ->
+            if (constraint.kind == ConstraintKind.UPPER) return@map true
 
-                for (constraint in constraints) {
-                    if (constraint.kind == ConstraintKind.LOWER || constraint.kind == ConstraintKind.EQUALITY) {
-                        if (constraint.type.argumentsCount() > 0) {
-                            val res = fixVariableRecusively(listOf(constraint.type as KotlinType), topLevelAtoms, completionMode)
-                            isFixed = isFixed && res
-                        }
-                    }
+            when {
+                constraint.type.argumentsCount() > 0 -> {
+                    fixVariablesInsideTypes((constraint.type as KotlinType).arguments.map { it.type }, topLevelAtoms)
                 }
+                constraint.type.lowerBoundIfFlexible().typeConstructor() is TypeVariableTypeConstructor -> {
+                    val hasProperConstraint = variableFixationFinder.isTypeVariableHasProperConstraint(
+                        this,
+                        constraint.type.lowerBoundIfFlexible().typeConstructor()
+                    )
+                    if (hasProperConstraint)
+                        fixVariable(this, notFixedTypeVariable, topLevelAtoms)
+                    hasProperConstraint
+                }
+                else -> true
+            }
+        }.all { it }
+    }
+
+    private fun Context.fixVariablesInsideTypes(types: List<KotlinType>, topLevelAtoms: List<ResolvedAtom>): Boolean =
+        types.map { type ->
+            val typeConstructor = type.constructor
+            if (typeConstructor is TypeVariableTypeConstructor && notFixedTypeVariables.containsKey(typeConstructor)) {
+                val isFixed = fixVariablesInsideConstraints(typeConstructor, topLevelAtoms)
 
                 val hasProperConstraint =
-                    variableFixationFinder.isTypeVariableHasProperConstraint(this, notFixedTypeVariable.typeVariable.freshTypeConstructor())
+                    variableFixationFinder.isTypeVariableHasProperConstraint(this, type.constructor)
 
-                if (hasProperConstraint)
-                    fixVariable(this, notFixedTypeVariable, topLevelAtoms)
-                else {
-                    isFixed = false
-                    if (completionMode == ConstraintSystemCompletionMode.FULL) {
-
-                    }
+                if (hasProperConstraint) {
+                    fixVariable(this, notFixedTypeVariables.getValue(typeConstructor), topLevelAtoms)
+                    isFixed
+                } else {
+                    false
                 }
-            }
-        }
+            } else if (type.arguments.isNotEmpty()) {
+                fixVariablesInsideTypes(type.arguments.map { it.type }, topLevelAtoms)
+            } else true
+        }.all { it }
 
-        return isFixed
-    }
+    private fun Context.fixVariablesInsideFunctionTypeArguments(
+        postponedArguments: List<PostponedResolvedAtom>,
+        topLevelAtoms: List<ResolvedAtom>
+    ) = postponedArguments.map { argument ->
+        val expectedType = argument.expectedType ?: return@map false
+        val isExpectedTypeFunctionTypeWithArguments = expectedType.isBuiltinFunctionalType && expectedType.arguments.size > 1
 
-    private fun Context.extractParameterTypes(atom: PostponedResolvedAtom, topLevelAtoms: List<ResolvedAtom>, completionMode: ConstraintSystemCompletionMode): Boolean {
-        if (atom.expectedType == null) return true
-
-        return if (atom.expectedType!!.arguments.size > 1) {
-            fixVariableRecusively(atom.expectedType!!.arguments.dropLast(1).map { it.type }, topLevelAtoms, completionMode)
+        if (isExpectedTypeFunctionTypeWithArguments) {
+            fixVariablesInsideTypes(expectedType.arguments.dropLast(1).map { it.type }, topLevelAtoms)
         } else true
-    }
-
-    private fun Context.collectInputTypes(postponedArguments: List<PostponedResolvedAtom>, topLevelAtoms: List<ResolvedAtom>, completionMode: ConstraintSystemCompletionMode): Boolean {
-        var isFixed = true
-
-        for (argument in postponedArguments) {
-            if (argument !is LambdaWithTypeVariableAsExpectedTypeAtom && argument !is ResolvedLambdaAtom) continue
-            val res = extractParameterTypes(argument, topLevelAtoms, completionMode)
-            isFixed = isFixed && res
-        }
-
-        return isFixed
-    }
+    }.all { it }
 
     private fun runCompletion(
         c: Context,
@@ -156,7 +153,7 @@ class KotlinConstraintSystemCompleter(
         analyze: (PostponedResolvedAtom) -> Unit
     ) {
         val postponedArguments = getOrderedNotAnalyzedPostponedArguments(topLevelAtoms)
-        val isFixed = c.collectInputTypes(postponedArguments, topLevelAtoms, completionMode)
+        val isFixed = c.fixVariablesInsideFunctionTypeArguments(postponedArguments, topLevelAtoms)
 
         if (!isFixed && completionMode != ConstraintSystemCompletionMode.FULL) return
 
