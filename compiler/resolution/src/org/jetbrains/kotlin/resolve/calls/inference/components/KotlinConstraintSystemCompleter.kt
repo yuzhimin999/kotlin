@@ -86,23 +86,29 @@ class KotlinConstraintSystemCompleter(
 
     private fun Context.fixVariablesInsideConstraints(
         typeVariable: TypeVariableTypeConstructor,
-        topLevelAtoms: List<ResolvedAtom>
+        topLevelAtoms: List<ResolvedAtom>,
+        completionMode: ConstraintSystemCompletionMode,
+        topLevelType: UnwrappedType
     ): Boolean {
         val notFixedTypeVariable = notFixedTypeVariables[typeVariable] ?: return true
 
         return notFixedTypeVariable.constraints.toMutableList().map { constraint ->
+            // решить проблему с upper constraints
             if (constraint.kind == ConstraintKind.UPPER) return@map true
 
             when {
                 constraint.type.argumentsCount() > 0 -> {
-                    fixVariablesInsideTypes((constraint.type as KotlinType).arguments.map { it.type }, topLevelAtoms)
+                    fixVariablesInsideTypes((constraint.type as KotlinType).arguments.map { it.type }, topLevelAtoms, completionMode, topLevelType)
                 }
                 constraint.type.lowerBoundIfFlexible().typeConstructor() is TypeVariableTypeConstructor -> {
-                    val hasProperConstraint = variableFixationFinder.isTypeVariableHasProperConstraint(
+                    val hasProperConstraint = variableFixationFinder.findFirstVariableForFixation(
                         this,
-                        constraint.type.lowerBoundIfFlexible().typeConstructor()
-                    )
-                    if (hasProperConstraint)
+                        listOf(constraint.type.lowerBoundIfFlexible().typeConstructor()),
+                        getOrderedNotAnalyzedPostponedArguments(topLevelAtoms),
+                        completionMode,
+                        topLevelType
+                    )?.hasProperConstraint == true
+                    if (hasProperConstraint && typeVariable in notFixedTypeVariables)
                         fixVariable(this, notFixedTypeVariable, topLevelAtoms)
                     hasProperConstraint
                 }
@@ -111,14 +117,20 @@ class KotlinConstraintSystemCompleter(
         }.all { it }
     }
 
-    private fun Context.fixVariablesInsideTypes(types: List<KotlinType>, topLevelAtoms: List<ResolvedAtom>): Boolean =
+    private fun Context.fixVariablesInsideTypes(
+        types: List<KotlinType>,
+        topLevelAtoms: List<ResolvedAtom>,
+        completionMode: ConstraintSystemCompletionMode,
+        topLevelType: UnwrappedType
+    ): Boolean =
         types.map { type ->
             val typeConstructor = type.constructor
             if (typeConstructor is TypeVariableTypeConstructor && notFixedTypeVariables.containsKey(typeConstructor)) {
-                val isFixed = fixVariablesInsideConstraints(typeConstructor, topLevelAtoms)
+                val isFixed = fixVariablesInsideConstraints(typeConstructor, topLevelAtoms, completionMode, topLevelType)
 
-                val hasProperConstraint =
-                    variableFixationFinder.isTypeVariableHasProperConstraint(this, type.constructor)
+                val hasProperConstraint = variableFixationFinder.findFirstVariableForFixation(
+                    this, listOf(typeConstructor), getOrderedNotAnalyzedPostponedArguments(topLevelAtoms), completionMode, topLevelType
+                )?.hasProperConstraint == true
 
                 if (hasProperConstraint) {
                     fixVariable(this, notFixedTypeVariables.getValue(typeConstructor), topLevelAtoms)
@@ -127,20 +139,29 @@ class KotlinConstraintSystemCompleter(
                     false
                 }
             } else if (type.arguments.isNotEmpty()) {
-                fixVariablesInsideTypes(type.arguments.map { it.type }, topLevelAtoms)
-            } else true
+                fixVariablesInsideTypes(type.arguments.map { it.type }, topLevelAtoms, completionMode, topLevelType)
+            } else {
+                true
+            }
         }.all { it }
 
     private fun Context.fixVariablesInsideFunctionTypeArguments(
         postponedArguments: List<PostponedResolvedAtom>,
-        topLevelAtoms: List<ResolvedAtom>
+        topLevelAtoms: List<ResolvedAtom>,
+        completionMode: ConstraintSystemCompletionMode,
+        topLevelType: UnwrappedType
     ) = postponedArguments.map { argument ->
         val expectedType = argument.expectedType ?: return@map false
         val isExpectedTypeFunctionTypeWithArguments = expectedType.isBuiltinFunctionalType && expectedType.arguments.size > 1
 
         if (isExpectedTypeFunctionTypeWithArguments) {
-            fixVariablesInsideTypes(expectedType.arguments.dropLast(1).map { it.type }, topLevelAtoms)
-        } else true
+            fixVariablesInsideTypes(expectedType.arguments.dropLast(1).map { it.type }, topLevelAtoms, completionMode, topLevelType)
+        } else if (expectedType.isBuiltinFunctionalType) {
+            true
+        } else {
+            fixVariablesInsideTypes(listOf(expectedType), topLevelAtoms, completionMode, topLevelType)
+            true
+        }
     }.all { it }
 
     private fun runCompletion(
@@ -153,15 +174,23 @@ class KotlinConstraintSystemCompleter(
         analyze: (PostponedResolvedAtom) -> Unit
     ) {
         val postponedArguments = getOrderedNotAnalyzedPostponedArguments(topLevelAtoms)
-        val isFixed = c.fixVariablesInsideFunctionTypeArguments(postponedArguments, topLevelAtoms)
+        val isFixed = c.fixVariablesInsideFunctionTypeArguments(postponedArguments, topLevelAtoms, completionMode, topLevelType)
 
         if (!isFixed && completionMode != ConstraintSystemCompletionMode.FULL) return
 
         for (argument in postponedArguments) {
             val expectedType = argument.expectedType
-            val atom = if (expectedType?.isBuiltinFunctionalType == false && expectedType.constructor is TypeVariableTypeConstructor) {
+            val atom = if (expectedType?.isBuiltinFunctionalType == false && expectedType.constructor is TypeVariableTypeConstructor && expectedType.constructor in c.notFixedTypeVariables) {
                 c.preparePostponedAtom(expectedType, argument, expectedType.builtIns, diagnosticsHolder) ?: argument
-            } else argument
+            } else if (expectedType != null && expectedType.constructor in (c as NewConstraintSystemImpl).fixedTypeVariables) {
+                if (argument is LambdaWithTypeVariableAsExpectedTypeAtom) {
+                    val csBuilder = (c as NewConstraintSystem).getBuilder()
+//                    argument.transformToResolvedLambda(csBuilder, diagnosticsHolder, c.fixedTypeVariables[expectedType.constructor]!! as UnwrappedType)
+                    argument
+                } else argument // create a new functional type
+            } else {
+                argument
+            }
 
             analyze(atom)
         }

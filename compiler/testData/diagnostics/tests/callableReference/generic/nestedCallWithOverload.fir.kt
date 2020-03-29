@@ -3,7 +3,7 @@
 
 fun foo(i: Int) {}
 fun foo(s: String) {}
-fun <T> id(x: T): T = x
+fun <K> id(x: K): K = x
 fun <T> baz(x: T, y: T): T = TODO()
 
 fun test() {
@@ -11,7 +11,7 @@ fun test() {
     val x2: (Int) -> Unit = baz(id(::foo), ::foo)
     val x3: (Int) -> Unit = baz(id(::foo), id(id(::foo)))
     val x4: (String) -> Unit = baz(id(::foo), id(id(::foo)))
-    val x5: (Double) -> Unit = baz(id(<!UNRESOLVED_REFERENCE!>::foo<!>), id(id(<!UNRESOLVED_REFERENCE!>::foo<!>)))
+    val x5: (Double) -> Unit = baz(id(::<!NI;CALLABLE_REFERENCE_RESOLUTION_AMBIGUITY, OI;NONE_APPLICABLE!>foo<!>), id(id(::<!NI;CALLABLE_REFERENCE_RESOLUTION_AMBIGUITY, OI;NONE_APPLICABLE!>foo<!>)))
 
 
     id<(Int) -> Unit>(id(id(::foo)))
@@ -21,4 +21,6 @@ fun test() {
     baz(id(::foo), id<(Int) -> Unit>(id(::foo)))
 
     baz(id { it.inv() }, id<(Int) -> Unit> { })
+    baz(id { x -> x.inv() }, id { x: Int -> })
+    baz(id { it.inv() }, id { x: Int -> })
 }
