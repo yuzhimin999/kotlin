@@ -320,8 +320,9 @@ class CallableReferencesCandidateFactory(
 
         val coercion = if (returnExpectedType.isUnit()) CoercionStrategy.COERCION_TO_UNIT else CoercionStrategy.NO_COERCION
 
+        val isKCallableType = expectedType != null && ReflectionTypes.isBaseTypeForNumberedReferenceTypes(expectedType)
         val adaptedArguments =
-            if (expectedType != null && ReflectionTypes.isBaseTypeForNumberedReferenceTypes(expectedType))
+            if (isKCallableType || mappedArguments.values.all { it is ResolvedCallArgument.SimpleArgument })
                 emptyMap()
             else
                 mappedArguments
