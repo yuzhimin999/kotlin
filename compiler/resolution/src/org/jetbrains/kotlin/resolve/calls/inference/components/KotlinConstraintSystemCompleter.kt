@@ -159,8 +159,7 @@ class KotlinConstraintSystemCompleter(
         } else if (expectedType.isBuiltinFunctionalType) {
             true
         } else {
-            fixVariablesInsideTypes(listOf(expectedType), topLevelAtoms, completionMode, topLevelType)
-            true
+            false
         }
     }.all { it }
 
@@ -174,11 +173,24 @@ class KotlinConstraintSystemCompleter(
         analyze: (PostponedResolvedAtom) -> Unit
     ) {
         val postponedArguments = getOrderedNotAnalyzedPostponedArguments(topLevelAtoms)
+
+        // посмотреть внимательно на testElvisNotProcessed, там нет никаких перед фиксацией переменной происходит резолв лямбды с помощью resolveLambdaByAdditionalConditions
+        // а я сначала фиксирую, из-за чего получается Nothing
         val isFixed = c.fixVariablesInsideFunctionTypeArguments(postponedArguments, topLevelAtoms, completionMode, topLevelType)
 
-        if (!isFixed && completionMode != ConstraintSystemCompletionMode.FULL) return
-
         for (argument in postponedArguments) {
+            if (!isFixed && completionMode != ConstraintSystemCompletionMode.FULL) {
+                val expectedType = argument.expectedType
+                if (expectedType?.constructor is TypeVariableTypeConstructor && expectedType.constructor in c.notFixedTypeVariables) {
+                    val vv = variableFixationFinder.findFirstVariableForFixation(
+                        c, listOf(expectedType.constructor), getOrderedNotAnalyzedPostponedArguments(topLevelAtoms), ConstraintSystemCompletionMode.FULL, topLevelType
+                    )
+                    if (vv?.hasProperConstraint == true) {
+                        return
+                    }
+                } else return
+            }
+
             val expectedType = argument.expectedType
             val atom = if (expectedType?.isBuiltinFunctionalType == false && expectedType.constructor is TypeVariableTypeConstructor && expectedType.constructor in c.notFixedTypeVariables) {
                 c.preparePostponedAtom(expectedType, argument, expectedType.builtIns, diagnosticsHolder) ?: argument
