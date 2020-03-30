@@ -19,7 +19,6 @@ import org.jetbrains.kotlin.fir.references.FirSuperReference
 import org.jetbrains.kotlin.fir.render
 import org.jetbrains.kotlin.fir.resolve.firSymbolProvider
 import org.jetbrains.kotlin.fir.resolve.toSymbol
-import org.jetbrains.kotlin.fir.symbols.StandardClassIds
 import org.jetbrains.kotlin.fir.symbols.impl.FirCallableSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirClassSymbol
 import org.jetbrains.kotlin.fir.symbols.impl.FirFunctionSymbol
@@ -80,10 +79,7 @@ internal class CallAndReferenceGenerator(
                     )
                 }
             }
-        }.apply {
-            applyTypeArguments(callableReferenceAccess)
-            applyReceivers(callableReferenceAccess)
-        }
+        }.applyTypeArguments(callableReferenceAccess).applyReceivers(callableReferenceAccess)
     }
 
     fun convertToIrCall(qualifiedAccess: FirQualifiedAccess, typeRef: FirTypeRef): IrExpression {
@@ -237,17 +233,13 @@ internal class CallAndReferenceGenerator(
     }
 
     fun convertToGetObject(qualifier: FirResolvedQualifier): IrExpression {
-        return convertToGetObject(qualifier, onlyObjects = false)!!
+        return convertToGetObject(qualifier, callableReferenceMode = false)!!
     }
 
-    private fun convertToGetObject(qualifier: FirResolvedQualifier, onlyObjects: Boolean): IrExpression? {
+    private fun convertToGetObject(qualifier: FirResolvedQualifier, callableReferenceMode: Boolean): IrExpression? {
         val typeRef = qualifier.typeRef as? FirResolvedTypeRef
         val classSymbol = (typeRef?.type as? ConeClassLikeType)?.lookupTag?.toSymbol(session)
-        if (onlyObjects && classSymbol is FirRegularClassSymbol) {
-            val kind = classSymbol.fir.classKind
-            if (kind != ClassKind.OBJECT && kind != ClassKind.ENUM_ENTRY) {
-                return null
-            }
+        if (callableReferenceMode && classSymbol is FirRegularClassSymbol) {
             if (classSymbol.classId != qualifier.classId) {
                 return null
             }
@@ -345,12 +337,12 @@ internal class CallAndReferenceGenerator(
     private fun FirQualifiedAccess.findIrReceiver(isDispatch: Boolean): IrExpression? {
         val firReceiver = if (isDispatch) dispatchReceiver else extensionReceiver
         if (firReceiver is FirResolvedQualifier) {
-            return convertToGetObject(firReceiver, onlyObjects = this is FirCallableReferenceAccess)
+            return convertToGetObject(firReceiver, callableReferenceMode = this is FirCallableReferenceAccess)
         }
         return firReceiver.takeIf { it !is FirNoReceiverExpression }?.let { visitor.convertToIrExpression(it) }
             ?: explicitReceiver?.let {
                 if (it is FirResolvedQualifier) {
-                    return convertToGetObject(it, onlyObjects = this is FirCallableReferenceAccess)
+                    return convertToGetObject(it, callableReferenceMode = this is FirCallableReferenceAccess)
                 }
                 visitor.convertToIrExpression(it)
             }
