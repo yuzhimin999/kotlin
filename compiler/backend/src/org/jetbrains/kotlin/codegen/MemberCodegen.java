@@ -16,11 +16,9 @@ import org.jetbrains.kotlin.codegen.context.*;
 import org.jetbrains.kotlin.codegen.inline.DefaultSourceMapper;
 import org.jetbrains.kotlin.codegen.inline.NameGenerator;
 import org.jetbrains.kotlin.codegen.inline.ReifiedTypeParametersUsages;
-import org.jetbrains.kotlin.codegen.inline.SourceMapper;
 import org.jetbrains.kotlin.codegen.state.GenerationState;
 import org.jetbrains.kotlin.codegen.state.KotlinTypeMapper;
 import org.jetbrains.kotlin.codegen.state.TypeMapperUtilsKt;
-import org.jetbrains.kotlin.config.ApiVersion;
 import org.jetbrains.kotlin.config.LanguageFeature;
 import org.jetbrains.kotlin.descriptors.*;
 import org.jetbrains.kotlin.descriptors.annotations.AnnotatedImpl;
@@ -405,7 +403,7 @@ public abstract class MemberCodegen<T extends KtPureElement/* TODO: & KtDeclarat
             if (context instanceof MethodContext) {
                 FunctionDescriptor functionDescriptor = ((MethodContext) context).getFunctionDescriptor();
                 if (isInterface(functionDescriptor.getContainingDeclaration()) && !JvmAnnotationUtilKt
-                        .isCompiledToJvmDefaultIfNoAbstract(functionDescriptor, state.getJvmDefaultMode())) {
+                        .isCompiledToJvmDefault(functionDescriptor, state.getJvmDefaultMode())) {
                     return typeMapper.mapDefaultImpls(classDescriptor);
                 }
             }
@@ -748,7 +746,7 @@ public abstract class MemberCodegen<T extends KtPureElement/* TODO: & KtDeclarat
     protected final void generateSyntheticAccessors() {
         for (AccessorForCallableDescriptor<?> accessor : ((CodegenContext<?>) context).getAccessors()) {
             boolean compiledToJvmDefault =
-                    JvmAnnotationUtilKt.isCompiledToJvmDefaultIfNoAbstract(accessor.getCalleeDescriptor(), state.getJvmDefaultMode());
+                    JvmAnnotationUtilKt.isCompiledToJvmDefault(accessor.getCalleeDescriptor(), state.getJvmDefaultMode());
             OwnerKind kind = context.getContextKind();
 
             if (!isInterface(context.getContextDescriptor()) ||

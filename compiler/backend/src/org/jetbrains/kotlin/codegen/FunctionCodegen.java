@@ -747,8 +747,8 @@ public class FunctionCodegen {
     ) {
         return OwnerKind.DEFAULT_IMPLS == context.getContextKind() &&
                JvmAnnotationUtilKt
-                       .isCompiledToJvmDefaultIfNoAbstract(DescriptorUtils.unwrapFakeOverrideToAnyDeclaration(functionDescriptor),
-                                                           jvmDefaultMode) &&
+                       .isCompiledToJvmDefault(DescriptorUtils.unwrapFakeOverrideToAnyDeclaration(functionDescriptor),
+                                               jvmDefaultMode) &&
                jvmDefaultMode.isCompatibility();
     }
 
@@ -1442,7 +1442,7 @@ public class FunctionCodegen {
         }
         else {
             if (isInterface(descriptor.getContainingDeclaration()) &&
-                JvmAnnotationUtilKt.isCompiledToJvmDefaultIfNoAbstract(descriptor, state.getJvmDefaultMode())) {
+                JvmAnnotationUtilKt.isCompiledToJvmDefault(descriptor, state.getJvmDefaultMode())) {
                 iv.invokeinterface(v.getThisName(), delegateTo.getName(), delegateTo.getDescriptor());
             }
             else {
@@ -1632,7 +1632,7 @@ public class FunctionCodegen {
         assert isInterface(containingDeclaration) : "'processInterfaceMethod' method should be called only for interfaces, but: " +
                                                     containingDeclaration;
 
-        if (JvmAnnotationUtilKt.isCompiledToJvmDefaultIfNoAbstract(memberDescriptor, mode)) {
+        if (JvmAnnotationUtilKt.isCompiledToJvmDefault(memberDescriptor, mode)) {
             return (kind != OwnerKind.DEFAULT_IMPLS && !isSynthetic) ||
                    (kind == OwnerKind.DEFAULT_IMPLS && (isSynthetic || mode.isCompatibility()));
         } else {
