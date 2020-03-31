@@ -30,7 +30,7 @@ import org.jetbrains.kotlin.idea.inspections.gradle.findAll
 import org.jetbrains.kotlin.idea.inspections.gradle.findKotlinPluginVersion
 import org.jetbrains.kotlin.idea.platform.IdePlatformKindTooling
 import org.jetbrains.kotlin.idea.roots.migrateNonJvmSourceFolders
-import org.jetbrains.kotlin.konan.target.HostManager
+import org.jetbrains.kotlin.konan.target.KonanTarget
 import org.jetbrains.kotlin.platform.TargetPlatform
 import org.jetbrains.kotlin.platform.impl.JvmIdePlatformKind
 import org.jetbrains.kotlin.platform.impl.NativeIdePlatformKind
@@ -105,18 +105,17 @@ class KotlinSourceSetDataService : AbstractProjectDataService<GradleSourceSetDat
 
             val platformKinds = kotlinSourceSet.actualPlatforms.platforms //TODO(auskov): fix calculation of jvm target
                 .map { IdePlatformKindTooling.getTooling(it).kind }
-                .flatMap {
-                    when (it) {
+                .flatMap { platformKind ->
+                    when (platformKind) {
                         is JvmIdePlatformKind -> {
                             val jvmTarget = JvmTarget.fromString(moduleData.targetCompatibility ?: "") ?: JvmTarget.DEFAULT
                             JvmPlatforms.jvmPlatformByTargetVersion(jvmTarget).componentPlatforms
                         }
                         is NativeIdePlatformKind -> {
-                            val konanTargets = moduleData.konanTargets ?: setOf(HostManager.host.name)
-                            // TODO: initialize one or more KonanPlatforms with concrete konan targets, return one TargetPlatform
-                            NativePlatforms.defaultNativePlatform
+                            val nativeTargets = moduleData.konanTargets?.mapNotNull { KonanTarget.predefinedTargets[it] } ?: emptyList()
+                            NativePlatforms.nativePlatformByTargets(nativeTargets)
                         }
-                        else -> it.defaultPlatform.componentPlatforms
+                        else -> platformKind.defaultPlatform.componentPlatforms
                     }
                 }
                 .distinct()
