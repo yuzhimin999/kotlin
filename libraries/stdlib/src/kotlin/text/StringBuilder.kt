@@ -428,3 +428,31 @@ public fun StringBuilder.append(vararg value: Any?): StringBuilder {
         append(item)
     return this
 }
+
+/** Appends a line separator to this StringBuilder. */
+public expect fun StringBuilder.appendln(): StringBuilder
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: CharSequence?): StringBuilder = append(value).appendln()
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: String?): StringBuilder = append(value).appendln()
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: Any?): StringBuilder = append(value).appendln()
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@UseExperimental(ExperimentalStdlibApi::class)
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: CharArray): StringBuilder = append(value).appendln()
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: Char): StringBuilder = append(value).appendln()
+
+/** Appends [value] to this [StringBuilder], followed by a line separator. */
+@kotlin.internal.InlineOnly
+public inline fun StringBuilder.appendln(value: Boolean): StringBuilder = append(value).appendln()

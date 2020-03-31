@@ -35,3 +35,7 @@ public actual interface Appendable {
      */
     public actual fun append(value: CharSequence?, startIndex: Int, endIndex: Int): Appendable
 }
+
+/** Appends a line separator to this Appendable. */
+@kotlin.internal.InlineOnly
+public actual inline fun Appendable.appendln(): Appendable = append("\n")

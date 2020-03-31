@@ -65,6 +65,17 @@ public fun <T : Appendable> T.append(vararg value: CharSequence?): T {
     return this
 }
 
+/** Appends a line separator to this Appendable. */
+public expect fun Appendable.appendln(): Appendable
+
+/** Appends value to the given Appendable and line separator after it. */
+@kotlin.internal.InlineOnly
+public inline fun Appendable.appendln(value: CharSequence?): Appendable = append(value).appendln()
+
+/** Appends value to the given Appendable and line separator after it. */
+@kotlin.internal.InlineOnly
+public inline fun Appendable.appendln(value: Char): Appendable = append(value).appendln()
+
 
 internal fun <T> Appendable.appendElement(element: T, transform: ((T) -> CharSequence)?) {
     when {

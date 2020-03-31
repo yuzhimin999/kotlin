@@ -711,3 +711,7 @@ public actual inline fun StringBuilder.insertRange(index: Int, value: CharArray,
 @Suppress("EXTENSION_SHADOWED_BY_MEMBER", "NOTHING_TO_INLINE")
 public actual inline fun StringBuilder.insertRange(index: Int, value: CharSequence?, startIndex: Int, endIndex: Int): StringBuilder =
     this.insertRange(index, value, startIndex, endIndex)
+
+/** Appends a line separator to this StringBuilder. */
+@kotlin.internal.InlineOnly
+public actual inline fun StringBuilder.appendln(): StringBuilder = append("\n")
