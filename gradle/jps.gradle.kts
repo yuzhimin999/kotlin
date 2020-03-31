@@ -200,6 +200,7 @@ if (kotlinBuildProperties.isInJpsBuildIdeaSync) {
                             moduleName = "kotlin.pill.generate-all-tests.test"
                             workingDirectory = rootDir.toString()
                             mainClass = "org.jetbrains.kotlin.pill.generateAllTests.Main"
+                            jvmArgs = "\"-Dline.separator=\n\""
                         }
 
                         defaults<JUnit> {
