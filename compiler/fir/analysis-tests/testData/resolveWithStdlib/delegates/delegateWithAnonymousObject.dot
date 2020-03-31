@@ -117,8 +117,8 @@ digraph delegateWithAnonymousObject_kt {
         35 [label="Enter function getter" style="filled" fillcolor=red];
         36 [label="Access variable D|/IssuesListUserProfile.issueListView|"];
         37 [label="Access variable this@R|/IssuesListUserProfile|"];
-        38 [label="Function call: D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.getValue: R|IssueListView|>|(...)"];
-        39 [label="Jump: ^ D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.getValue: R|IssueListView|>|(this@R|/IssuesListUserProfile|, ::R|/IssuesListUserProfile.issueListView|)"];
+        38 [label="Function call: this@R|/IssuesListUserProfile|.D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.getValue: R|IssueListView|>|(...)"];
+        39 [label="Jump: ^ this@R|/IssuesListUserProfile|.D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.getValue: R|IssueListView|>|(this@R|/IssuesListUserProfile|, ::R|/IssuesListUserProfile.issueListView|)"];
         40 [label="Stub" style="filled" fillcolor=gray];
         41 [label="Exit function getter" style="filled" fillcolor=red];
     }
@@ -137,7 +137,7 @@ digraph delegateWithAnonymousObject_kt {
         43 [label="Access variable D|/IssuesListUserProfile.issueListView|"];
         44 [label="Access variable this@R|/IssuesListUserProfile|"];
         45 [label="Access variable R|<local>/issueListView|"];
-        46 [label="Function call: D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.setValue: R|kotlin/Unit|>|(...)"];
+        46 [label="Function call: this@R|/IssuesListUserProfile|.D|/IssuesListUserProfile.issueListView|.R|FakeOverride<kotlin/properties/ReadWriteProperty.setValue: R|kotlin/Unit|>|(...)"];
         47 [label="Exit function setter" style="filled" fillcolor=red];
     }
 
