@@ -103,9 +103,8 @@ abstract class AbstractQuickFixTest : KotlinLightCodeInsightFixtureTestCase(), Q
                 TestCase.assertTrue("\"<caret>\" is missing in file \"${testFile.path}\"", fileText.contains("<caret>"))
 
                 fixtureClasses = InTextDirectivesUtils.findListWithPrefixes(fileText, "// FIXTURE_CLASS: ")
-                for (fixtureClass in fixtureClasses) {
-                    TestFixtureExtension.loadFixture(fixtureClass, module)
-                }
+
+                TestFixtureExtension.loadFixtures(fixtureClasses, module)
 
                 expectedErrorMessage = InTextDirectivesUtils.findStringWithPrefixes(fileText, "// SHOULD_FAIL_WITH: ")
                 val contents = StringUtil.convertLineSeparators(fileText)
@@ -144,9 +143,7 @@ abstract class AbstractQuickFixTest : KotlinLightCodeInsightFixtureTestCase(), Q
                     Assert.assertEquals("Wrong exception message", expectedErrorMessage, e.message)
                 }
             } finally {
-                for (fixtureClass in fixtureClasses) {
-                    TestFixtureExtension.unloadFixture(fixtureClass)
-                }
+                TestFixtureExtension.unloadFixtures(fixtureClasses)
                 ConfigLibraryUtil.unconfigureLibrariesByDirective(myFixture.module, fileText)
             }
         }, "", "")

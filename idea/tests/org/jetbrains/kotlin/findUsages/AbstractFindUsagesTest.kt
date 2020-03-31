@@ -107,11 +107,10 @@ abstract class AbstractFindUsagesTest : KotlinLightCodeInsightFixtureTestCase() 
         }) as Class<T>
 
         val fixtureClasses = InTextDirectivesUtils.findListWithPrefixes(mainFileText, "// FIXTURE_CLASS: ")
-        for (fixtureClass in fixtureClasses) {
-            TestFixtureExtension.loadFixture(fixtureClass, myFixture.module)
-        }
 
         try {
+            TestFixtureExtension.loadFixtures(fixtureClasses, myFixture.module)
+
             extraConfig(path)
 
             val parser = OptionsParser.getParserByPsiElementClass(caretElementClass)
@@ -166,7 +165,7 @@ abstract class AbstractFindUsagesTest : KotlinLightCodeInsightFixtureTestCase() 
                 findUsagesAndCheckResults(mainFileText, prefixForCheck, rootPath, caretElement, options, project)
             }
         } finally {
-            fixtureClasses.forEach { TestFixtureExtension.unloadFixture(it) }
+            TestFixtureExtension.unloadFixtures(fixtureClasses)
         }
     }
 

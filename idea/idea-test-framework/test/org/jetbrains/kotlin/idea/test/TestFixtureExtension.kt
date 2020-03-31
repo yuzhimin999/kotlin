@@ -28,28 +28,24 @@ interface TestFixtureExtension {
         private var instances = SmartFMap.emptyMap<String, TestFixtureExtension>()
 
         @Suppress("UNCHECKED_CAST")
-        fun loadFixture(className: String, module: Module): TestFixtureExtension {
-            instances[className]?.let { return it }
-
-            return (Class.forName(className).newInstance() as TestFixtureExtension).apply {
-                this.setUp(module)
-                instances = instances.plus(className, this)
-            }
+        fun loadFixtures(classNames: List<String>, module: Module) {
+            classNames.mapNotNull { className ->
+                if (instances[className] == null) {
+                    (Class.forName(className).newInstance() as TestFixtureExtension).apply {
+                        instances = instances.plus(className, this)
+                    }
+                } else null
+            }.forEach { it.setUp(module) }
         }
 
-        inline fun <reified T : TestFixtureExtension> loadFixture(module: Module) = loadFixture(T::class.qualifiedName!!, module) as T
-
-        fun getFixture(className: String) = instances[className]
-
-        inline fun <reified T : TestFixtureExtension> getFixture() = getFixture(T::class.qualifiedName!!) as? T
-
-        fun unloadFixture(className: String) {
-            instances[className]?.let {
-                it.tearDown()
-                instances = instances.minus(className)
-            }
+        fun unloadFixtures(classNames: List<String>) {
+            classNames.mapNotNull { className ->
+                val value = instances[className]
+                if (value != null) {
+                    instances = instances.minus(className)
+                    value
+                } else null
+            }.forEach { it.tearDown() }
         }
-
-        inline fun <reified T : TestFixtureExtension> unloadFixture() = unloadFixture(T::class.qualifiedName!!)
     }
 }

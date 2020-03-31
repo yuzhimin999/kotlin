@@ -116,7 +116,7 @@ abstract class AbstractInspectionTest : KotlinLightCodeInsightFixtureTestCase() 
                 configureRegistryAndRun(options) {
                     try {
                         FormatSettingsUtil.createConfigurator(options, codeStyleSettings).configureSettings()
-                        fixtureClasses.forEach { TestFixtureExtension.loadFixture(it, myFixture.module) }
+                        TestFixtureExtension.loadFixtures(fixtureClasses, myFixture.module)
 
                         configExtra(psiFiles, options)
 
@@ -147,7 +147,7 @@ abstract class AbstractInspectionTest : KotlinLightCodeInsightFixtureTestCase() 
 
                     } finally {
                         codeStyleSettings.clearCodeStyleSettings()
-                        fixtureClasses.forEach { TestFixtureExtension.unloadFixture(it) }
+                        TestFixtureExtension.unloadFixtures(fixtureClasses)
                     }
                 }
             }

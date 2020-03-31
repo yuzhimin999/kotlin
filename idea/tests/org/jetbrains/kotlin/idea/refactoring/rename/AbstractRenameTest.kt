@@ -111,7 +111,7 @@ abstract class AbstractRenameTest : KotlinLightCodeInsightFixtureTestCase() {
         val fixtureClasses = renameObject.getAsJsonArray("fixtureClasses")?.map { it.asString } ?: emptyList()
 
         try {
-            fixtureClasses.forEach { TestFixtureExtension.loadFixture(it, module) }
+            TestFixtureExtension.loadFixtures(fixtureClasses, module)
 
             val context = TestContext(testFile)
 
@@ -155,7 +155,7 @@ abstract class AbstractRenameTest : KotlinLightCodeInsightFixtureTestCase() {
                 Assert.fail("""Unexpected "hint: $hintExceptionUnquoted" """)
             }
         } finally {
-            fixtureClasses.forEach { TestFixtureExtension.unloadFixture(it) }
+            TestFixtureExtension.unloadFixtures(fixtureClasses)
         }
     }
 
