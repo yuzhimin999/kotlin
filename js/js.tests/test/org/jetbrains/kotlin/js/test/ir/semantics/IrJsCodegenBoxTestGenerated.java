@@ -1616,9 +1616,24 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
                 runTest("compiler/testData/codegen/box/callableReference/equality/coercionToUnitWithVararg.kt");
             }
 
+            @TestMetadata("extensionReceiverVsDefault.kt")
+            public void testExtensionReceiverVsDefault() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/extensionReceiverVsDefault.kt");
+            }
+
+            @TestMetadata("noCoercionToUnitIfFunctionAlreadyReturnsUnit.kt")
+            public void testNoCoercionToUnitIfFunctionAlreadyReturnsUnit() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/noCoercionToUnitIfFunctionAlreadyReturnsUnit.kt");
+            }
+
             @TestMetadata("simpleEquality.kt")
             public void testSimpleEquality() throws Exception {
                 runTest("compiler/testData/codegen/box/callableReference/equality/simpleEquality.kt");
+            }
+
+            @TestMetadata("varargAsArrayMemberOrExtension.kt")
+            public void testVarargAsArrayMemberOrExtension() throws Exception {
+                runTest("compiler/testData/codegen/box/callableReference/equality/varargAsArrayMemberOrExtension.kt");
             }
 
             @TestMetadata("varargAsArrayWithDefaults.kt")
@@ -16152,11 +16167,6 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
                     KotlinTestUtils.assertAllTestsPresentByMetadataWithExcluded(this.getClass(), new File("compiler/testData/codegen/box/ranges/contains/generated"), Pattern.compile("^(.+)\\.kt$"), null, TargetBackend.JS_IR, true);
                 }
 
-                @TestMetadata("arrayIndices.kt")
-                public void testArrayIndices() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/arrayIndices.kt");
-                }
-
                 @TestMetadata("charDownTo.kt")
                 public void testCharDownTo() throws Exception {
                     runTest("compiler/testData/codegen/box/ranges/contains/generated/charDownTo.kt");
@@ -16167,29 +16177,9 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
                     runTest("compiler/testData/codegen/box/ranges/contains/generated/charRangeLiteral.kt");
                 }
 
-                @TestMetadata("charSequenceIndices.kt")
-                public void testCharSequenceIndices() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/charSequenceIndices.kt");
-                }
-
                 @TestMetadata("charUntil.kt")
                 public void testCharUntil() throws Exception {
                     runTest("compiler/testData/codegen/box/ranges/contains/generated/charUntil.kt");
-                }
-
-                @TestMetadata("collectionIndices.kt")
-                public void testCollectionIndices() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/collectionIndices.kt");
-                }
-
-                @TestMetadata("doubleRangeLiteral.kt")
-                public void testDoubleRangeLiteral() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/doubleRangeLiteral.kt");
-                }
-
-                @TestMetadata("floatRangeLiteral.kt")
-                public void testFloatRangeLiteral() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/floatRangeLiteral.kt");
                 }
 
                 @TestMetadata("intDownTo.kt")
@@ -16207,19 +16197,9 @@ public class IrJsCodegenBoxTestGenerated extends AbstractIrJsCodegenBoxTest {
                     runTest("compiler/testData/codegen/box/ranges/contains/generated/intUntil.kt");
                 }
 
-                @TestMetadata("longDownTo.kt")
-                public void testLongDownTo() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/longDownTo.kt");
-                }
-
                 @TestMetadata("longRangeLiteral.kt")
                 public void testLongRangeLiteral() throws Exception {
                     runTest("compiler/testData/codegen/box/ranges/contains/generated/longRangeLiteral.kt");
-                }
-
-                @TestMetadata("longUntil.kt")
-                public void testLongUntil() throws Exception {
-                    runTest("compiler/testData/codegen/box/ranges/contains/generated/longUntil.kt");
                 }
             }
         }

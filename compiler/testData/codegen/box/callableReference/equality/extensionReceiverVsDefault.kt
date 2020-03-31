@@ -1,15 +1,14 @@
 // IGNORE_BACKEND: JS, JS_IR, NATIVE
-// IGNORE_BACKEND_FIR: JVM_IR
 // FILE: test.kt
 
 fun checkNotEqual(x: Any, y: Any) {
     if (x == y || y == x) throw AssertionError("$x and $y should NOT be equal")
 }
 
-fun target(s1: String, vararg xs: Int, s2: String = "") {}
+fun target(s: String = "") {}
 
-fun capture1(fn: (String, IntArray, String) -> Unit): Any = fn
-fun capture2(fn: (String, Int, Int) -> Unit): Any = fn
+fun capture1(fn: String.() -> Unit): Any = fn
+fun capture2(fn: () -> Unit): Any = fn
 
 fun box(): String {
     checkNotEqual(capture1(::target), capture2(::target))

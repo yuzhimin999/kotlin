@@ -16,11 +16,16 @@ public class FunctionReference extends CallableReference implements FunctionBase
     /**
      * Bitmask where bits represent the following flags:<br/>
      * <li>
-     *     <ul>0..7 - the number of parameters in the functional type where this reference was originally passed to.
-     *                Might differ from the number of parameters of the referenced function, in case it has default
-     *                and/or vararg parameters.</ul>
-     *     <ul>8 - whether the vararg->Array parameter type conversion happened.</ul>
-     *     <ul>9 - whether coercion of return type to Unit happened.</ul>
+     *     <ul>0 - whether the vararg to element parameter type conversion happened, i.e.<pre>
+     *         fun target(vararg xs: Int) {}
+     *         fun use(f: (Int, Int, Int) -> Unit) {}
+     *         use(::target)
+     *     </pre></ul>
+     *     <ul>1 - whether coercion of return type to Unit happened, i.e.<pre>
+     *         fun target(): Boolean = true
+     *         fun use(f: () -> Unit) {}
+     *         use(::target)
+     *     </pre></ul>
      * </li>
      */
     @SinceKotlin(version = "1.4")
@@ -99,6 +104,7 @@ public class FunctionReference extends CallableReference implements FunctionBase
                    getName().equals(other.getName()) &&
                    getSignature().equals(other.getSignature()) &&
                    flags == other.flags &&
+                   arity == other.arity &&
                    Intrinsics.areEqual(getBoundReceiver(), other.getBoundReceiver());
         }
         if (obj instanceof KFunction) {
@@ -109,8 +115,7 @@ public class FunctionReference extends CallableReference implements FunctionBase
 
     @Override
     public int hashCode() {
-        return (((getOwner() == null ? 0 : getOwner().hashCode() * 31) + getName().hashCode()) * 31 + getSignature().hashCode()) * 31 +
-               Integer.valueOf(flags).hashCode();
+        return ((getOwner() == null ? 0 : getOwner().hashCode() * 31) + getName().hashCode()) * 31 + getSignature().hashCode();
     }
 
     @Override

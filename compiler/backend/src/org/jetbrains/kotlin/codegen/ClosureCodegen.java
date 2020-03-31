@@ -31,14 +31,13 @@ import org.jetbrains.kotlin.incremental.components.NoLookupLocation;
 import org.jetbrains.kotlin.load.java.JvmAbi;
 import org.jetbrains.kotlin.load.kotlin.header.KotlinClassHeader;
 import org.jetbrains.kotlin.metadata.ProtoBuf;
-import org.jetbrains.kotlin.psi.FakeImplicitSpreadValueArgumentForCallableReference;
 import org.jetbrains.kotlin.psi.KtElement;
 import org.jetbrains.kotlin.resolve.DescriptorUtils;
 import org.jetbrains.kotlin.resolve.calls.model.ResolvedCall;
-import org.jetbrains.kotlin.resolve.calls.model.VarargValueArgument;
 import org.jetbrains.kotlin.resolve.descriptorUtil.DescriptorUtilsKt;
 import org.jetbrains.kotlin.resolve.jvm.diagnostics.JvmDeclarationOriginKt;
 import org.jetbrains.kotlin.resolve.scopes.MemberScope;
+import org.jetbrains.kotlin.resolve.scopes.receivers.TransientReceiver;
 import org.jetbrains.kotlin.serialization.DescriptorSerializer;
 import org.jetbrains.kotlin.types.KotlinType;
 import org.jetbrains.kotlin.types.SimpleType;
@@ -544,20 +543,26 @@ public class ClosureCodegen extends MemberCodegen<KtElement> {
     private static int calculateFunctionReferenceFlags(
             @NotNull ResolvedCall<?> call, @NotNull FunctionDescriptor anonymousAdaptedFunction
     ) {
-        boolean hasFakeVararg = CollectionsKt.any(
-                call.getValueArguments().values(),
-                argument ->
-                        argument instanceof VarargValueArgument &&
-                        CollectionsKt.firstOrNull(argument.getArguments()) instanceof FakeImplicitSpreadValueArgumentForCallableReference
-        );
+        boolean hasVarargMappedToElement = false;
+        CallableDescriptor target = call.getResultingDescriptor();
+        int shift =
+                (call.getDispatchReceiver() instanceof TransientReceiver ? 1 : 0) +
+                (call.getExtensionReceiver() instanceof TransientReceiver ? 1 : 0);
+        for (int i = shift; i < anonymousAdaptedFunction.getValueParameters().size() &&
+                            i - shift < target.getValueParameters().size(); i++) {
+            KotlinType varargElementType = target.getValueParameters().get(i - shift).getVarargElementType();
+            if (varargElementType != null && !varargElementType.equals(anonymousAdaptedFunction.getValueParameters().get(i).getType())) {
+                hasVarargMappedToElement = true;
+                break;
+            }
+        }
 
         //noinspection ConstantConditions
         boolean hasCoercionToUnit = KotlinBuiltIns.isUnit(anonymousAdaptedFunction.getReturnType()) &&
-                                    !KotlinBuiltIns.isUnit(call.getResultingDescriptor().getReturnType());
+                                    !KotlinBuiltIns.isUnit(target.getReturnType());
 
-        return anonymousAdaptedFunction.getValueParameters().size() +
-               ((hasFakeVararg ? 1 : 0) << 8) +
-               ((hasCoercionToUnit ? 1 : 0) << 9);
+        return (hasVarargMappedToElement ? 1 : 0) +
+               ((hasCoercionToUnit ? 1 : 0) << 1);
     }
 
     protected int calculateArity() {
