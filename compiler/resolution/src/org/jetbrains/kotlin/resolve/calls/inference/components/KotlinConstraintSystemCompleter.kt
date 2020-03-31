@@ -186,9 +186,9 @@ class KotlinConstraintSystemCompleter(
                         c, listOf(expectedType.constructor), getOrderedNotAnalyzedPostponedArguments(topLevelAtoms), ConstraintSystemCompletionMode.FULL, topLevelType
                     )
                     if (vv?.hasProperConstraint == true) {
-                        return
+                        continue
                     }
-                } else return
+                } else continue
             }
 
             val expectedType = argument.expectedType
