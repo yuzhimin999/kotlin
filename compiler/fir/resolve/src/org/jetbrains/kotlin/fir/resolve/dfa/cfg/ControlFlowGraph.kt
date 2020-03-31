@@ -42,6 +42,15 @@ class ControlFlowGraph(val declaration: FirDeclaration?, val name: String, val k
         _subGraphs += graph
     }
 
+    internal fun removeSubGraph(graph: ControlFlowGraph) {
+        assert(graph.owner == this)
+        _subGraphs.remove(graph)
+        graph.owner = null
+
+        CFGNode.removeAllIncomingEdges(graph.enterNode)
+        CFGNode.removeAllOutgoingEdges(graph.exitNode)
+    }
+
     enum class Kind {
         Function, ClassInitializer, TopLevel
     }
@@ -65,6 +74,28 @@ sealed class CFGNode<out E : FirElement>(val owner: ControlFlowGraph, val level:
             }
             if (propagateDeadness && kind == EdgeKind.Dead) {
                 to.isDead = true
+            }
+        }
+
+        internal fun removeAllIncomingEdges(node: CFGNode<*>) {
+            val iterator = node._previousNodes.iterator()
+            while (iterator.hasNext()) {
+                val from = iterator.next()
+                from._followingNodes.remove(node)
+                iterator.remove()
+                node._incomingEdges.remove(from)
+                from._outgoingEdges.remove(node)
+            }
+        }
+
+        internal fun removeAllOutgoingEdges(node: CFGNode<*>) {
+            val iterator = node._followingNodes.iterator()
+            while (iterator.hasNext()) {
+                val to = iterator.next()
+                to._previousNodes.remove(node)
+                iterator.remove()
+                to._incomingEdges.remove(node)
+                node._outgoingEdges.remove(to)
             }
         }
     }
