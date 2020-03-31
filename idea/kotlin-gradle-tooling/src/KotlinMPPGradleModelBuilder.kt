@@ -19,6 +19,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskProvider
+import org.gradle.internal.impldep.org.apache.commons.lang.SystemUtils
 import org.jetbrains.kotlin.gradle.KotlinMPPGradleModel.Companion.NO_KOTLIN_NATIVE_HOME
 import org.jetbrains.plugins.gradle.DefaultExternalDependencyId
 import org.jetbrains.plugins.gradle.model.*
@@ -82,7 +83,9 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
                 null
             }?.toString()?.toBoolean() ?: DEFAULT_IMPORT_ORPHAN_SOURCE_SETS
         ) return sourceSets
-        val compiledSourceSets: Collection<String> = targets.flatMap { it.compilations }.flatMap { it.sourceSets }.flatMap { it.dependsOnSourceSets.union(listOf(it.name)) }.distinct()
+        val compiledSourceSets: Collection<String> =
+            targets.flatMap { it.compilations }.flatMap { it.sourceSets }.flatMap { it.dependsOnSourceSets.union(listOf(it.name)) }
+                .distinct()
         sourceSets.filter { !compiledSourceSets.contains(it.key) }.forEach {
             logger.warn("[sync warning] Source set \"${it.key}\" is not compiled with any compilation. This source set is not imported in the IDE.")
         }
@@ -211,7 +214,8 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
         val dependsOnSourceSets = (getDependsOn(gradleSourceSet) as? Set<Named>)?.mapTo(LinkedHashSet()) { it.name } ?: emptySet<String>()
 
         val sourceSetDependenciesBuilder: () -> Array<KotlinDependencyId> = {
-            buildSourceSetDependencies(gradleSourceSet, dependencyResolver, project, androidDeps).map { dependencyMapper.getId(it) }.distinct()
+            buildSourceSetDependencies(gradleSourceSet, dependencyResolver, project, androidDeps).map { dependencyMapper.getId(it) }
+                .distinct()
                 .toTypedArray()
         }
         return KotlinSourceSetProto(
@@ -375,7 +379,10 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
             }
         }
         val jar = buildTargetJar(gradleTarget, project)
-        val testTasks = buildTestTasks(project, gradleTarget)
+        val testTasks = if (KotlinPlatform.NATIVE != platform
+            || (KotlinPlatform.NATIVE == platform && isAppropriateHostToTarget(targetPresetName))
+        ) buildTestTasks(project, gradleTarget) else emptyList()
+
         val artifacts = konanArtifacts(gradleTarget)
         val target = KotlinTargetImpl(
             gradleTarget.name,
@@ -912,5 +919,16 @@ private fun Project.getChildProjectByPath(path: String): Project? {
         project = project.childProjects[name] ?: return null
     }
     return project
+}
+
+/**
+ * The predicate is based on (documentation)[https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#using-kotlinnative-targets]
+ */
+private fun isAppropriateHostToTarget(targetPresetName: String?) = when (targetPresetName) {
+    "macosX64", "iosX64", "iosArm32", "iosArm64", "watchosArm32", "watchosArm64", "watchosX86", "tvosArm64", "tvosX64" -> SystemUtils.IS_OS_MAC
+    "mingwX64", "mingwX86" -> SystemUtils.IS_OS_WINDOWS
+    "linuxMips32", "linuxMipsel32" -> SystemUtils.IS_OS_LINUX
+    "androidNativeArm64" -> SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC
+    else -> true
 }
 
