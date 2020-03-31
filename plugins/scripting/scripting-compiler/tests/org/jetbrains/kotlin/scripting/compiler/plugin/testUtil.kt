@@ -55,6 +55,17 @@ fun runWithKotlinc(
         }
         addAll(compilerArgs)
     }
+
+    runAndCheckResults(args, expectedOutPatterns, expectedExitCode, workDirectory, additionalEnvVars)
+}
+
+fun runAndCheckResults(
+    args: List<String>,
+    expectedOutPatterns: List<String> = emptyList(),
+    expectedExitCode: Int = 0,
+    workDirectory: File? = null,
+    additionalEnvVars: Iterable<Pair<String, String>>? = null
+) {
     val processBuilder = ProcessBuilder(args)
     if (workDirectory != null) {
         processBuilder.directory(workDirectory)
