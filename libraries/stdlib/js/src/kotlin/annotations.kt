@@ -186,4 +186,4 @@ public annotation class ExperimentalJsExport
 @SinceKotlin("1.3")
 @Retention(AnnotationRetention.BINARY)
 @Target(CLASS, PROPERTY, FUNCTION, FILE)
-public annotation class JsExport
+public actual annotation class JsExport

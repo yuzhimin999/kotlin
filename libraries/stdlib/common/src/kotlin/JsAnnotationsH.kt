@@ -13,3 +13,15 @@ import kotlin.annotation.AnnotationTarget.*
 @Target(CLASS, FUNCTION, PROPERTY, CONSTRUCTOR, PROPERTY_GETTER, PROPERTY_SETTER)
 @OptionalExpectation
 public expect annotation class JsName(val name: String)
+
+/**
+ * Exports top-level declaration.
+ *
+ * Used in future IR-based backend.
+ * Has no effect in current JS backend.
+ */
+@SinceKotlin("1.4")
+@Retention(AnnotationRetention.BINARY)
+@Target(CLASS, PROPERTY, FUNCTION, FILE)
+@OptionalExpectation
+public expect annotation class JsExport
