@@ -1196,6 +1196,18 @@ public inline fun <S : CharSequence> S.onEach(action: (Char) -> Unit): S {
 }
 
 /**
+ * Performs the given [action] on each character, providing sequential index with the character,
+ * and returns the char sequence itself afterwards.
+ * @param [action] function that takes the index of a character and the character itself
+ * and performs the desired action on the character.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun <S : CharSequence> S.onEachIndexed(action: (index: Int, Char) -> Unit): S {
+    return apply { forEachIndexed(action) }
+}
+
+/**
  * Accumulates value starting with the first character and applying [operation] from left to right to current accumulator value and each character.
  * 
  * @sample samples.collections.Collections.Aggregates.reduce

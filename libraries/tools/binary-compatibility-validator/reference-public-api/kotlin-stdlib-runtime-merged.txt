@@ -4673,6 +4673,7 @@ public final class kotlin/sequences/SequencesKt {
 	public static final fun none (Lkotlin/sequences/Sequence;)Z
 	public static final fun none (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function1;)Z
 	public static final fun onEach (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function1;)Lkotlin/sequences/Sequence;
+	public static final fun onEachIndexed (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function2;)Lkotlin/sequences/Sequence;
 	public static final fun partition (Lkotlin/sequences/Sequence;Lkotlin/jvm/functions/Function1;)Lkotlin/Pair;
 	public static final fun plus (Lkotlin/sequences/Sequence;Ljava/lang/Iterable;)Lkotlin/sequences/Sequence;
 	public static final fun plus (Lkotlin/sequences/Sequence;Ljava/lang/Object;)Lkotlin/sequences/Sequence;

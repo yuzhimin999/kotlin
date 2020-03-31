@@ -13304,6 +13304,114 @@ public inline fun CharArray.none(predicate: (Char) -> Boolean): Boolean {
 }
 
 /**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun <T> Array<out T>.onEachIndexed(action: (index: Int, T) -> Unit): Array<out T> {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ByteArray.onEachIndexed(action: (index: Int, Byte) -> Unit): ByteArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ShortArray.onEachIndexed(action: (index: Int, Short) -> Unit): ShortArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun IntArray.onEachIndexed(action: (index: Int, Int) -> Unit): IntArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun LongArray.onEachIndexed(action: (index: Int, Long) -> Unit): LongArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun FloatArray.onEachIndexed(action: (index: Int, Float) -> Unit): FloatArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun DoubleArray.onEachIndexed(action: (index: Int, Double) -> Unit): DoubleArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun BooleanArray.onEachIndexed(action: (index: Int, Boolean) -> Unit): BooleanArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun CharArray.onEachIndexed(action: (index: Int, Char) -> Unit): CharArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
  * Accumulates value starting with the first element and applying [operation] from left to right to current accumulator value and each element.
  * 
  * @sample samples.collections.Collections.Aggregates.reduce

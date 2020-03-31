@@ -5871,6 +5871,58 @@ public inline fun UShortArray.none(predicate: (UShort) -> Boolean): Boolean {
 }
 
 /**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UIntArray.onEachIndexed(action: (index: Int, UInt) -> Unit): UIntArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun ULongArray.onEachIndexed(action: (index: Int, ULong) -> Unit): ULongArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UByteArray.onEachIndexed(action: (index: Int, UByte) -> Unit): UByteArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
+ * Performs the given [action] on each element, providing sequential index with the element,
+ * and returns the array itself afterwards.
+ * @param [action] function that takes the index of an element and the element itself
+ * and performs the desired action on the element.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UShortArray.onEachIndexed(action: (index: Int, UShort) -> Unit): UShortArray {
+    return apply { forEachIndexed(action) }
+}
+
+/**
  * Accumulates value starting with the first element and applying [operation] from left to right to current accumulator value and each element.
  * 
  * @sample samples.collections.Collections.Aggregates.reduce
