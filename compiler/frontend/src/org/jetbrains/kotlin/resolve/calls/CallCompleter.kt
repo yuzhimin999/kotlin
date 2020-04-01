@@ -47,6 +47,7 @@ import org.jetbrains.kotlin.resolve.constants.IntegerValueTypeConstructor
 import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.expressions.DataFlowAnalyzer
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 import java.util.*
@@ -60,7 +61,8 @@ class CallCompleter(
     private val deprecationResolver: DeprecationResolver,
     private val effectSystem: EffectSystem,
     private val dataFlowValueFactory: DataFlowValueFactory,
-    private val missingSupertypesResolver: MissingSupertypesResolver
+    private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) {
     fun <D : CallableDescriptor> completeCall(
         context: BasicCallResolutionContext,
@@ -89,7 +91,8 @@ class CallCompleter(
                     if (calleeExpression != null && !calleeExpression.isFakeElement) calleeExpression
                     else resolvedCall.call.callElement
 
-                val callCheckerContext = CallCheckerContext(context, deprecationResolver, moduleDescriptor, missingSupertypesResolver)
+                val callCheckerContext =
+                    CallCheckerContext(context, deprecationResolver, moduleDescriptor, missingSupertypesResolver, kotlinTypeRefiner)
                 for (callChecker in callCheckers) {
                     callChecker.check(resolvedCall, reportOn, callCheckerContext)
 

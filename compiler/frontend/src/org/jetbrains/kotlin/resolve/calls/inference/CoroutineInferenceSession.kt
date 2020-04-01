@@ -26,6 +26,7 @@ import org.jetbrains.kotlin.resolve.calls.tower.*
 import org.jetbrains.kotlin.resolve.calls.util.FakeCallableDescriptorForObject
 import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.expressions.DoubleColonExpressionResolver
 import org.jetbrains.kotlin.types.expressions.ExpressionTypingServices
 import org.jetbrains.kotlin.types.typeUtil.contains
@@ -47,7 +48,8 @@ class CoroutineInferenceSession(
     private val deprecationResolver: DeprecationResolver,
     private val moduleDescriptor: ModuleDescriptor,
     private val typeApproximator: TypeApproximator,
-    private val missingSupertypesResolver: MissingSupertypesResolver
+    private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) : ManyCandidatesResolver<CallableDescriptor>(
     psiCallResolver, postponedArgumentsAnalyzer, kotlinConstraintSystemCompleter, callComponents, builtIns
 ) {
@@ -311,7 +313,8 @@ class CoroutineInferenceSession(
         return ResolvedAtomCompleter(
             resultSubstitutor, context, kotlinToResolvedCallTransformer,
             expressionTypingServices, argumentTypeResolver, doubleColonExpressionResolver, builtIns,
-            deprecationResolver, moduleDescriptor, context.dataFlowValueFactory, typeApproximator, missingSupertypesResolver
+            deprecationResolver, moduleDescriptor, context.dataFlowValueFactory, typeApproximator, missingSupertypesResolver,
+            kotlinTypeRefiner,
         )
     }
 }

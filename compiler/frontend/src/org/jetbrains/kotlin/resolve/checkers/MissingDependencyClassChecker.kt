@@ -28,12 +28,14 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.fqNameSafe
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedContainerSource
 import org.jetbrains.kotlin.serialization.deserialization.descriptors.DeserializedMemberDescriptor
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
+import org.jetbrains.kotlin.types.refinement.TypeRefinement
 import org.jetbrains.kotlin.utils.newLinkedHashSetWithExpectedSize
 
 object MissingDependencyClassChecker : CallChecker {
     override fun check(resolvedCall: ResolvedCall<*>, reportOn: PsiElement, context: CallCheckerContext) {
         val resultingDescriptor = resolvedCall.resultingDescriptor
-        for (diagnostic in collectDiagnostics(reportOn, resultingDescriptor)) {
+        for (diagnostic in collectDiagnostics(reportOn, resultingDescriptor, context)) {
             context.trace.report(diagnostic)
         }
 
@@ -66,7 +68,9 @@ object MissingDependencyClassChecker : CallChecker {
         return null
     }
 
-    private fun collectDiagnostics(reportOn: PsiElement, descriptor: CallableDescriptor): Set<Diagnostic> {
+    
+    @OptIn(TypeRefinement::class)
+    private fun collectDiagnostics(reportOn: PsiElement, descriptor: CallableDescriptor, context: CallCheckerContext): Set<Diagnostic> {
         val result: MutableSet<Diagnostic> = newLinkedHashSetWithExpectedSize(1)
 
         fun consider(classDescriptor: ClassDescriptor) {
@@ -80,7 +84,8 @@ object MissingDependencyClassChecker : CallChecker {
 
         fun consider(type: KotlinType) {
             if (!isComputingDeferredType(type)) {
-                (type.constructor.declarationDescriptor as? ClassDescriptor)?.let(::consider)
+                val refinedType = type.refine(context.kotlinTypeRefiner)
+                (refinedType.constructor.declarationDescriptor as? ClassDescriptor)?.let(::consider)
             }
         }
 

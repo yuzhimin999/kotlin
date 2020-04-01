@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
 import org.jetbrains.kotlin.resolve.scopes.receivers.TransientReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.expressions.DoubleColonExpressionResolver
 import org.jetbrains.kotlin.types.expressions.ExpressionTypingServices
 import org.jetbrains.kotlin.types.expressions.typeInfoFactory.createTypeInfo
@@ -60,10 +61,11 @@ class ResolvedAtomCompleter(
     private val moduleDescriptor: ModuleDescriptor,
     private val dataFlowValueFactory: DataFlowValueFactory,
     private val typeApproximator: TypeApproximator,
-    private val missingSupertypesResolver: MissingSupertypesResolver
+    private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) {
     private val topLevelCallCheckerContext = CallCheckerContext(
-        topLevelCallContext, deprecationResolver, moduleDescriptor, missingSupertypesResolver
+        topLevelCallContext, deprecationResolver, moduleDescriptor, missingSupertypesResolver, kotlinTypeRefiner
     )
     private val topLevelTrace = topLevelCallCheckerContext.trace
 
@@ -129,7 +131,8 @@ class ResolvedAtomCompleter(
                 resolutionContextForPartialCall.replaceBindingTrace(topLevelTrace),
                 deprecationResolver,
                 moduleDescriptor,
-                missingSupertypesResolver
+                missingSupertypesResolver,
+                kotlinTypeRefiner,
             )
         else
             topLevelCallCheckerContext

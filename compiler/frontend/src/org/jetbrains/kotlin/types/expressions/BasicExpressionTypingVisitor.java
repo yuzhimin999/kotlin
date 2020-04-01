@@ -966,6 +966,7 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
                                     components.deprecationResolver,
                                     components.moduleDescriptor,
                                     components.missingSupertypesResolver,
+                                    components.kotlinTypeRefiner,
                                     trace
                             );
                     for (CallChecker checker : components.callCheckers) {
@@ -1052,7 +1053,8 @@ public class BasicExpressionTypingVisitor extends ExpressionTypingVisitor {
                 context,
                 components.deprecationResolver,
                 components.moduleDescriptor,
-                components.missingSupertypesResolver
+                components.missingSupertypesResolver,
+                components.kotlinTypeRefiner
         );
     }
 

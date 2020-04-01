@@ -24,6 +24,7 @@ import org.jetbrains.kotlin.resolve.constants.evaluate.ConstantExpressionEvaluat
 import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver;
 import org.jetbrains.kotlin.extensions.internal.TypeResolutionInterceptor;
 import org.jetbrains.kotlin.types.WrappedTypeFactory;
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner;
 import org.jetbrains.kotlin.types.checker.NewKotlinTypeChecker;
 
 import javax.inject.Inject;
@@ -67,6 +68,7 @@ public class ExpressionTypingComponents {
     /*package*/ NewKotlinTypeChecker kotlinTypeChecker;
     /*package*/ TypeResolutionInterceptor typeResolutionInterceptor;
     /*package*/ MissingSupertypesResolver missingSupertypesResolver;
+    /*package*/ KotlinTypeRefiner kotlinTypeRefiner;
 
 
     @Inject
@@ -257,5 +259,10 @@ public class ExpressionTypingComponents {
     @Inject
     public void setMissingSupertypesResolver(@NotNull MissingSupertypesResolver missingSupertypesResolver) {
         this.missingSupertypesResolver = missingSupertypesResolver;
+    }
+    
+    @Inject
+    public void setKotlinTypeRefiner(@NotNull KotlinTypeRefiner kotlinTypeRefiner) {
+        this.kotlinTypeRefiner = kotlinTypeRefiner;
     }
 }

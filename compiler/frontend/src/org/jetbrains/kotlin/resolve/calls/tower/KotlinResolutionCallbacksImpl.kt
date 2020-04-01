@@ -41,6 +41,7 @@ import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
 import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.scopes.LexicalScope
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.expressions.DoubleColonExpressionResolver
 import org.jetbrains.kotlin.types.expressions.ExpressionTypingServices
 import org.jetbrains.kotlin.types.expressions.KotlinTypeInfo
@@ -76,7 +77,8 @@ class KotlinResolutionCallbacksImpl(
     private val deprecationResolver: DeprecationResolver,
     private val moduleDescriptor: ModuleDescriptor,
     private val topLevelCallContext: BasicCallResolutionContext?,
-    private val missingSupertypesResolver: MissingSupertypesResolver
+    private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) : KotlinResolutionCallbacks {
     class LambdaInfo(val expectedType: UnwrappedType, val contextDependency: ContextDependency) {
         val returnStatements = ArrayList<Pair<KtReturnExpression, LambdaContextInfo?>>()
@@ -171,7 +173,7 @@ class KotlinResolutionCallbacksImpl(
                     callComponents, builtIns, topLevelCallContext, stubsForPostponedVariables, trace,
                     kotlinToResolvedCallTransformer, expressionTypingServices, argumentTypeResolver,
                     doubleColonExpressionResolver, deprecationResolver, moduleDescriptor, typeApproximator,
-                    missingSupertypesResolver
+                    missingSupertypesResolver, kotlinTypeRefiner,
                 )
             } else {
                 null

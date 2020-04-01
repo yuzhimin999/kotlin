@@ -43,6 +43,7 @@ import org.jetbrains.kotlin.resolve.descriptorUtil.builtIns
 import org.jetbrains.kotlin.resolve.scopes.*
 import org.jetbrains.kotlin.resolve.scopes.receivers.*
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.expressions.*
 import org.jetbrains.kotlin.types.model.TypeSystemInferenceExtensionContext
 import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
@@ -70,7 +71,8 @@ class PSICallResolver(
     private val moduleDescriptor: ModuleDescriptor,
     private val callableReferenceResolver: CallableReferenceResolver,
     private val candidateInterceptor: CandidateInterceptor,
-    private val missingSupertypesResolver: MissingSupertypesResolver
+    private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) {
     private val givenCandidatesName = Name.special("<given candidates>")
 
@@ -187,7 +189,8 @@ class PSICallResolver(
             argumentTypeResolver, languageVersionSettings, kotlinToResolvedCallTransformer,
             dataFlowValueFactory, inferenceSession, constantExpressionEvaluator, typeResolver,
             this, postponedArgumentsAnalyzer, kotlinConstraintSystemCompleter, callComponents,
-            doubleColonExpressionResolver, deprecationResolver, moduleDescriptor, context, missingSupertypesResolver
+            doubleColonExpressionResolver, deprecationResolver, moduleDescriptor, context, missingSupertypesResolver,
+            kotlinTypeRefiner,
         )
 
     private fun calculateExpectedType(context: BasicCallResolutionContext): UnwrappedType? {

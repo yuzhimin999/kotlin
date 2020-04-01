@@ -51,6 +51,7 @@ import org.jetbrains.kotlin.resolve.scopes.receivers.CastImplicitClassReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ImplicitClassReceiver
 import org.jetbrains.kotlin.resolve.scopes.receivers.ReceiverValue
 import org.jetbrains.kotlin.types.*
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.checker.NewCapturedType
 import org.jetbrains.kotlin.types.expressions.DataFlowAnalyzer
 import org.jetbrains.kotlin.types.expressions.DoubleColonExpressionResolver
@@ -81,6 +82,7 @@ class KotlinToResolvedCallTransformer(
     private val smartCastManager: SmartCastManager,
     private val typeApproximator: TypeApproximator,
     private val missingSupertypesResolver: MissingSupertypesResolver,
+    private val kotlinTypeRefiner: KotlinTypeRefiner,
 ) {
     companion object {
         private val REPORT_MISSING_NEW_INFERENCE_DIAGNOSTIC
@@ -144,7 +146,7 @@ class KotlinToResolvedCallTransformer(
                 val ktPrimitiveCompleter = ResolvedAtomCompleter(
                     resultSubstitutor, context, this, expressionTypingServices, argumentTypeResolver,
                     doubleColonExpressionResolver, builtIns, deprecationResolver, moduleDescriptor, dataFlowValueFactory,
-                    typeApproximator, missingSupertypesResolver,
+                    typeApproximator, missingSupertypesResolver, kotlinTypeRefiner,
                 )
 
                 if (context.inferenceSession.shouldCompleteResolvedSubAtomsOf(candidate)) {

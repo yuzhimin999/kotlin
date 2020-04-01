@@ -30,6 +30,7 @@ import org.jetbrains.kotlin.resolve.deprecation.DeprecationResolver
 import org.jetbrains.kotlin.resolve.scopes.LexicalScope
 import org.jetbrains.kotlin.types.DeferredType
 import org.jetbrains.kotlin.types.KotlinType
+import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 
 interface CallChecker {
     /**
@@ -44,6 +45,7 @@ class CallCheckerContext @JvmOverloads constructor(
     override val deprecationResolver: DeprecationResolver,
     override val moduleDescriptor: ModuleDescriptor,
     val missingSupertypesResolver: MissingSupertypesResolver,
+    val kotlinTypeRefiner: KotlinTypeRefiner,
     override val trace: BindingTrace = resolutionContext.trace
 ) : CheckerContext {
     val scope: LexicalScope

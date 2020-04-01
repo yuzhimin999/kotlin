@@ -78,7 +78,7 @@ fun StorageComponentContainer.configureModule(
 
     useImpl<NewKotlinTypeCheckerImpl>()
 
-    if (languageVersionSettings.isTypeRefinementEnabled) {
+    if (/*languageVersionSettings.isTypeRefinementEnabled*/true) {
         useImpl<KotlinTypeRefinerImpl>()
     } else {
         useInstance(KotlinTypeRefiner.Default)

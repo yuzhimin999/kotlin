@@ -15,6 +15,7 @@ import org.jetbrains.kotlin.types.checker.KotlinTypeRefiner
 import org.jetbrains.kotlin.types.checker.NewCapturedTypeConstructor
 import org.jetbrains.kotlin.types.checker.REFINER_CAPABILITY
 import org.jetbrains.kotlin.types.refinement.TypeRefinement
+import org.jetbrains.kotlin.types.typeUtil.makeNullable
 import org.jetbrains.kotlin.utils.DFS
 import org.jetbrains.kotlin.utils.addToStdlib.safeAs
 
@@ -67,7 +68,9 @@ class KotlinTypeRefinerImpl(
                 val cached = refinedTypeCache.computeIfAbsent(type.constructor) {
                     type.constructor.declarationDescriptor!!.defaultType.refine(this)
                 }
-                cached.replace(type.arguments)
+                cached.replace(type.arguments).let { refined ->
+                    if (type.isMarkedNullable) refined.makeNullable() else refined
+                }
             }
             else -> type.refine(this)
         }
@@ -104,7 +107,9 @@ class KotlinTypeRefinerImpl(
     @TypeRefinement
     override fun isRefinementNeededForTypeConstructor(typeConstructor: TypeConstructor): Boolean {
         val owner = typeConstructor.declarationDescriptor ?: return typeConstructor.areThereExpectSupertypes()
-        return isRefinementNeededForTypeConstructorCache.computeIfAbsent(owner) { typeConstructor.areThereExpectSupertypes() }
+        return isRefinementNeededForTypeConstructorCache.computeIfAbsent(owner) {
+            typeConstructor.areThereExpectSupertypes() || typeConstructor.declarationDescriptor is NotFoundClasses.MockClassDescriptor 
+        }
     }
 
     @TypeRefinement
