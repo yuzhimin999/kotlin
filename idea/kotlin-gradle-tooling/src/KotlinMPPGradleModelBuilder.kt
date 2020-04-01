@@ -19,7 +19,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Exec
 import org.gradle.api.tasks.TaskProvider
-import org.gradle.internal.impldep.org.apache.commons.lang.SystemUtils
 import org.jetbrains.kotlin.gradle.KotlinMPPGradleModel.Companion.NO_KOTLIN_NATIVE_HOME
 import org.jetbrains.plugins.gradle.DefaultExternalDependencyId
 import org.jetbrains.plugins.gradle.model.*
@@ -360,10 +359,28 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
         val platform = KotlinPlatform.byId(platformId) ?: return null
         val disambiguationClassifier = getDisambiguationClassifier(gradleTarget) as? String
         val getPreset = targetClass.getMethodOrNull("getPreset")
+        var isAppropriateHost = true
         val targetPresetName: String?
         targetPresetName = try {
             val targetPreset = getPreset?.invoke(gradleTarget)
-            val getPresetName = targetPreset?.javaClass?.getMethodOrNull("getName")
+            val presetClass = targetPreset?.javaClass
+
+            if (platform == KotlinPlatform.NATIVE) {
+                val getKonanTarget = presetClass?.getMethodOrNull("getKonanTarget")
+                val konanTarget = getKonanTarget?.invoke(targetPreset)
+                konanTarget?.also {
+                    val konanTargetClass = it.javaClass
+                    val getName = konanTargetClass.getMethodOrNull("getName")
+                    val konanTargetName = getName?.invoke(it) as? String
+                    val hostManagerClass = konanTargetClass.classLoader.loadClass(HOST_MANAGER_CLASS)
+                    val getHostNameMethod = hostManagerClass.getMethodOrNull("getHostName")
+                    val constructor = hostManagerClass.getConstructor()
+                    val hostName = getHostNameMethod?.invoke(constructor.newInstance()) as? String
+                    isAppropriateHost = konanTargetName == hostName
+                }
+            }
+
+            val getPresetName = presetClass?.getMethodOrNull("getName")
             getPresetName?.invoke(targetPreset) as? String
         } catch (e: Throwable) {
             "${e::class.java.name}:${e.message}"
@@ -379,9 +396,7 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
             }
         }
         val jar = buildTargetJar(gradleTarget, project)
-        val testTasks = if (KotlinPlatform.NATIVE != platform
-            || (KotlinPlatform.NATIVE == platform && isAppropriateHostToTarget(targetPresetName))
-        ) buildTestTasks(project, gradleTarget) else emptyList()
+        val testTasks = if (isAppropriateHost) buildTestTasks(project, gradleTarget) else emptyList()
 
         val artifacts = konanArtifacts(gradleTarget)
         val target = KotlinTargetImpl(
@@ -889,6 +904,8 @@ class KotlinMPPGradleModelBuilder : ModelBuilderService {
     companion object {
         private val logger = Logging.getLogger(KotlinMPPGradleModelBuilder::class.java)
 
+        private val HOST_MANAGER_CLASS = "org.jetbrains.kotlin.konan.target.HostManager"
+
         fun Project.getTargets(): Collection<Named>? {
             val kotlinExt = project.extensions.findByName("kotlin") ?: return null
             val getTargets = kotlinExt.javaClass.getMethodOrNull("getTargets") ?: return null
@@ -920,15 +937,3 @@ private fun Project.getChildProjectByPath(path: String): Project? {
     }
     return project
 }
-
-/**
- * The predicate is based on (documentation)[https://kotlinlang.org/docs/reference/building-mpp-with-gradle.html#using-kotlinnative-targets]
- */
-private fun isAppropriateHostToTarget(targetPresetName: String?) = when (targetPresetName) {
-    "macosX64", "iosX64", "iosArm32", "iosArm64", "watchosArm32", "watchosArm64", "watchosX86", "tvosArm64", "tvosX64" -> SystemUtils.IS_OS_MAC
-    "mingwX64", "mingwX86" -> SystemUtils.IS_OS_WINDOWS
-    "linuxMips32", "linuxMipsel32" -> SystemUtils.IS_OS_LINUX
-    "androidNativeArm64" -> SystemUtils.IS_OS_LINUX || SystemUtils.IS_OS_MAC
-    else -> true
-}
-
