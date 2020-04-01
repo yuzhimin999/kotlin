@@ -67,6 +67,9 @@ object NotLinkedSpecTestPatterns : BasePatterns {
 object LinkedSpecTestPatterns : BasePatterns {
     private const val FILENAME_REGEX = """(?<sentenceNumber>$INTEGER_REGEX)\.(?<testNumber>$INTEGER_REGEX)\.kt"""
 
+    const val RELEVANT_PLACES = "RELEVANT PLACES"
+    const val ALTERNATIVE_PLACES = "ALTERNATIVE PLACES"
+
     override val pathPartRegex =
         """${SpecTestLinkedType.LINKED.testDataPath}$ps$sectionsInPathRegex${ps}p-(?<paragraphNumber>$INTEGER_REGEX)"""
     override val testPathPattern: Pattern =
@@ -83,7 +86,8 @@ object LinkedSpecTestPatterns : BasePatterns {
     private val relevantPlaceRegex =
         Regex("""(( $ASTERISK_REGEX )?\s*($SECTIONS_IN_FILE_REGEX -> )?(paragraph $INTEGER_REGEX -> )?sentence $INTEGER_REGEX)""")
 
-    val relevantPlaces: Pattern = Pattern.compile("""RELEVANT PLACES: (?<places>(${relevantPlaceRegex}(\s)*\n)+)""")
+    val relevantPlaces: Pattern = Pattern.compile("""$RELEVANT_PLACES: (?<places>(${relevantPlaceRegex}(\s)*\n)+)""")
+    val alternativePlaces: Pattern = Pattern.compile("""$ALTERNATIVE_PLACES: (?<places>(${relevantPlaceRegex}(\s)*\n)+)""")
 }
 
 object TestCasePatterns {
