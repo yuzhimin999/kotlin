@@ -9,6 +9,7 @@ import com.intellij.ProjectTopics
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction.nonBlocking
 import com.intellij.openapi.module.Module
+import com.intellij.openapi.progress.EmptyProgressIndicator
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.progress.runBackgroundableTask
 import com.intellij.openapi.project.Project
@@ -23,6 +24,7 @@ import org.jetbrains.kotlin.idea.core.script.ScriptDefinitionSourceAsContributor
 import org.jetbrains.kotlin.idea.core.script.ScriptDefinitionsManager
 import org.jetbrains.kotlin.idea.core.script.loadDefinitionsFromTemplates
 import org.jetbrains.kotlin.idea.util.ProgressIndicatorUtils
+import org.jetbrains.kotlin.idea.util.application.executeOnPooledThread
 import org.jetbrains.kotlin.idea.util.projectStructure.allModules
 import org.jetbrains.kotlin.scripting.definitions.SCRIPT_DEFINITION_MARKERS_EXTENSION_WITH_DOT
 import org.jetbrains.kotlin.scripting.definitions.SCRIPT_DEFINITION_MARKERS_PATH
@@ -78,10 +80,17 @@ class ScriptTemplatesFromDependenciesProvider(private val project: Project) : Sc
             if (!inProgress) {
                 inProgress = true
 
-                runBackgroundableTask("Kotlin: scanning dependencies for script definitions...", project, false) { indicator ->
-                    indicator.isIndeterminate = true
+                // in UnitTestMode background task is started in the same thread
+                if (ApplicationManager.getApplication().isUnitTestMode) {
+                    executeOnPooledThread {
+                        loadScriptDefinitions(EmptyProgressIndicator())
+                    }
+                } else {
+                    runBackgroundableTask("Kotlin: scanning dependencies for script definitions...", project, false) { indicator ->
+                        indicator.isIndeterminate = true
 
-                    loadScriptDefinitions(indicator)
+                        loadScriptDefinitions(indicator)
+                    }
                 }
             }
         }
