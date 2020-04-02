@@ -147,6 +147,11 @@ class FirDeclarationsResolveTransformer(transformer: FirBodyResolveTransformer) 
             if (typeRef is FirResolvedTypeRef && property.returnTypeRef is FirResolvedTypeRef) {
                 val typeArguments = (typeRef.type as ConeClassLikeType).typeArguments
                 val extensionType = (property.receiverTypeRef as? FirResolvedTypeRef)?.coneTypeSafe<ConeKotlinType>()
+                val dispatchType = containingClass?.let { containingClass ->
+                    containingClass.symbol.constructType(
+                        Array(containingClass.typeParameters.size) { ConeStarProjection }, isNullable = false
+                    )
+                }
                 it.replaceTypeRef(
                     buildResolvedTypeRef {
                         source = typeRef.source
@@ -156,12 +161,8 @@ class FirDeclarationsResolveTransformer(transformer: FirBodyResolveTransformer) 
                             typeArguments.mapIndexed { index, argument ->
                                 when (index) {
                                     typeArguments.size - 1 -> property.returnTypeRef.coneTypeUnsafe()
-                                    0 -> containingClass?.let { containingClass ->
-                                        containingClass.symbol.constructType(
-                                            Array(containingClass.typeParameters.size) { ConeStarProjection }, isNullable = false
-                                        )
-                                    } ?: extensionType
-                                    else -> extensionType
+                                    0 -> extensionType ?: dispatchType
+                                    else -> dispatchType
                                 } ?: argument
                             }.toTypedArray(),
                             isNullable = false
