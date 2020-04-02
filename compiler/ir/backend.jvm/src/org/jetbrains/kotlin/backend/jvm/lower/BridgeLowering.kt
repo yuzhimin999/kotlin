@@ -331,7 +331,7 @@ private class BridgeLowering(val context: JvmBackendContext) : FileLoweringPass,
             updateFrom(irFunction)
             modality = Modality.ABSTRACT
             origin = IrDeclarationOrigin.DEFINED
-            name = irFunction.name
+            name = Name.identifier(context.methodSignatureMapper.mapFunctionName(irFunction))
             returnType = irFunction.returnType
             isFakeOverride = false
         }.apply {
