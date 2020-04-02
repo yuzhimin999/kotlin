@@ -248,6 +248,7 @@ private fun MutableMap<AnalysisFlag<*>, Any>.initIDESpecificAnalysisSettings(pro
     if (KotlinMultiplatformAnalysisModeComponent.getMode(project) == KotlinMultiplatformAnalysisModeComponent.Mode.COMPOSITE) {
         put(AnalysisFlags.useTypeRefinement, true)
     }
+    putIfAbsent(AnalysisFlags.useTypeRefinement, true)
     put(AnalysisFlags.ideMode, true)
 }
 
