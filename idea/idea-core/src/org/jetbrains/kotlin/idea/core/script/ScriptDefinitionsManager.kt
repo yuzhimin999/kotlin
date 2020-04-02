@@ -28,6 +28,7 @@ import org.jetbrains.kotlin.idea.KotlinFileType
 import org.jetbrains.kotlin.idea.caches.project.SdkInfo
 import org.jetbrains.kotlin.idea.caches.project.getScriptRelatedModuleInfo
 import org.jetbrains.kotlin.idea.core.script.settings.KotlinScriptingSettings
+import org.jetbrains.kotlin.idea.util.application.executeOnPooledThread
 import org.jetbrains.kotlin.idea.util.application.getServiceSafe
 import org.jetbrains.kotlin.idea.util.getProjectJdkTableSafe
 import org.jetbrains.kotlin.script.ScriptTemplatesProvider
@@ -63,6 +64,12 @@ class ScriptDefinitionsManager(private val project: Project) : LazyScriptDefinit
 
     private val scriptDefinitionsCacheLock = ReentrantLock()
     private val scriptDefinitionsCache = SLRUMap<String, ScriptDefinition>(10, 10)
+
+    init {
+        executeOnPooledThread {
+            reloadScriptDefinitions()
+        }
+    }
 
     override fun findDefinition(script: SourceCode): ScriptDefinition? {
         val locationId = script.locationId ?: return null
@@ -147,9 +154,6 @@ class ScriptDefinitionsManager(private val project: Project) : LazyScriptDefinit
     }
 
     fun isReady(): Boolean {
-        if (definitions == null) {
-            reloadScriptDefinitions()
-        }
         return definitions != null && definitionsBySource.keys.all { source ->
             // TODO: implement another API for readiness checking
             (source as? ScriptDefinitionContributor)?.isReady() != false
@@ -319,7 +323,7 @@ fun ScriptDefinitionContributor.asSource(): ScriptDefinitionsSource =
     if (this is ScriptDefinitionsSource) this
     else ScriptDefinitionSourceFromContributor(this)
 
-class StandardScriptDefinitionContributor(project: Project) : ScriptDefinitionContributor {
+class StandardScriptDefinitionContributor(val project: Project) : ScriptDefinitionContributor {
     private val standardIdeScriptDefinition = StandardIdeScriptDefinition(project)
 
     override fun getDefinitions() = listOf(standardIdeScriptDefinition)
