@@ -325,10 +325,11 @@ fun FirPropertyBuilder.generateAccessorsByDelegate(
                     )
                 }
             }
-            // ???
-            extension -> buildQualifiedAccessExpression {
+            extension -> buildThisReceiverExpression {
                 source = delegateBuilder.source
-                calleeReference = buildExplicitThisReference {}
+                calleeReference = buildImplicitThisReference {
+                    boundSymbol = this@generateAccessorsByDelegate.symbol
+                }
             }
             else -> buildConstExpression(null, FirConstKind.Null, null)
         }
