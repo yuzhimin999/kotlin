@@ -113,6 +113,9 @@ class ScriptTemplatesFromDependenciesProvider(private val project: Project) : Sc
             definitionsLock.write {
                 _definitions = emptyList()
             }
+            inProgressLock.write {
+                inProgress = false
+            }
             return
         }
 
