@@ -34,6 +34,9 @@ import org.jetbrains.kotlin.gradle.tasks.internal.GradleExecOperationsHolder
 import org.jetbrains.kotlin.gradle.utils.canonicalPathWithoutExtension
 import java.io.File
 import org.jetbrains.kotlin.gradle.utils.isGradleVersionAtLeast
+import java.io.BufferedOutputStream
+import java.io.FileOutputStream
+import java.util.zip.ZipOutputStream
 
 @CacheableTask
 open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJsDce {
@@ -85,7 +88,7 @@ open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJs
         val log = GradleKotlinLogger(logger)
         val allArgs = argsArray + outputDirArgs + inputFiles
 
-        if (isGradleVersionAtLeast(6,0)) {
+        if (isGradleVersionAtLeast(6, 0)) {
             val gradleExecutionOperation = project.objects.newInstance(GradleExecOperationsHolder::class.java)
             gradleExecutionOperation.execOperation.javaexec {
                 it.classpath = project.files(computedCompilerClasspath)
@@ -94,8 +97,12 @@ open class KotlinJsDce : AbstractKotlinCompileTool<K2JSDceArguments>(), KotlinJs
             }.rethrowFailure()
         } else {
             val exitCode = runToolInSeparateProcess(
-                allArgs, K2JSDce::class.java.name, computedCompilerClasspath,
-                log
+                allArgs,
+                K2JSDce::class.java.name,
+                computedCompilerClasspath,
+                log,
+                project.buildDir,
+                destinationDir
             )
             throwGradleExceptionIfError(exitCode)
         }

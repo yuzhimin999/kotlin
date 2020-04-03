@@ -82,11 +82,26 @@ internal fun runToolInSeparateProcess(
     argsArray: Array<String>,
     compilerClassName: String,
     classpath: List<File>,
-    logger: KotlinLogger
+    logger: KotlinLogger,
+    dir: File,
+    inputFile: File
 ): ExitCode {
     val javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java"
     val classpathString = classpath.map { it.absolutePath }.joinToString(separator = File.pathSeparator)
-    val builder = ProcessBuilder(javaBin, "-cp", classpathString, compilerClassName, *argsArray)
+//    val builder = ProcessBuilder(javaBin, "-cp", classpathString, compilerClassName, *argsArray)
+    val optionFile = dir.resolve("compiler.options")
+    optionFile.writeText("-classpath $classpathString")
+//    argsArray.forEach { optionFile.appendText(" $it") }
+//        optionFile.writeText()
+
+    val compilerOptionFile = optionFile.absolutePath
+//    } ?: classpath.map { it.absolutePath }.joinToString(separator = File.pathSeparator)
+
+    System.out.println(compilerOptionFile)
+
+//    TODO use kotlinc from specified version
+    //TODO prepare input files see K2JSDce.collectInputFiles
+    val builder = ProcessBuilder("kotlinc", "@$compilerOptionFile", inputFile.path)
     val messageCollector = createLoggingMessageCollector(logger)
     val process = launchProcessWithFallback(builder, DaemonReportingTargets(messageCollector = messageCollector))
 
