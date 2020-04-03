@@ -174,7 +174,7 @@ public annotation class JsQualifier(val value: String)
 @Experimental(level = Experimental.Level.WARNING)
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @SinceKotlin("1.3")
-public annotation class ExperimentalJsExport
+public actual annotation class ExperimentalJsExport
 
 /**
  * Exports top-level declaration.

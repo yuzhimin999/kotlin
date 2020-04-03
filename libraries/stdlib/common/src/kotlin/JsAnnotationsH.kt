@@ -15,11 +15,28 @@ import kotlin.annotation.AnnotationTarget.*
 public expect annotation class JsName(val name: String)
 
 /**
+ * Marks experimental JS export annotations.
+ *
+ * Note that behaviour of these annotations will likely be changed in the future.
+ *
+ * Usages of such annotations will be reported as warnings unless an explicit opt-in with
+ * the [OptIn] annotation, e.g. `@OptIn(ExperimentalJsExport::class)`,
+ * or with the `-Xopt-in=kotlin.js.ExperimentalJsExport` compiler option is given.
+ */
+@Suppress("DEPRECATION")
+@Experimental(level = Experimental.Level.WARNING)
+@RequiresOptIn(level = RequiresOptIn.Level.WARNING)
+@SinceKotlin("1.4")
+@OptionalExpectation
+public expect annotation class ExperimentalJsExport
+
+/**
  * Exports top-level declaration.
  *
  * Used in future IR-based backend.
  * Has no effect in current JS backend.
  */
+@ExperimentalJsExport
 @SinceKotlin("1.4")
 @Retention(AnnotationRetention.BINARY)
 @Target(CLASS, PROPERTY, FUNCTION, FILE)
