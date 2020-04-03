@@ -123,6 +123,276 @@ public fun <C : MutableCollection<in R>, R> Array<*>.filterIsInstanceTo(destinat
 }
 
 /**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun <T> Array<T>.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ByteArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ShortArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun IntArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun LongArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun FloatArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun DoubleArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun BooleanArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun CharArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    if (fromIndex < 0 || toIndex > size)
+        throw IndexOutOfBoundsException("fromIndex: $fromIndex, toIndex: $toIndex, size: $size")
+    if (fromIndex > toIndex)
+        throw IllegalArgumentException("fromIndex: $fromIndex > toIndex: $toIndex")
+    val midPoint = (fromIndex + toIndex) / 2
+    if (fromIndex == midPoint) return
+    var reverseIndex = toIndex - 1
+    for (index in fromIndex until midPoint) {
+        val tmp = this[index]
+        this[index] = this[reverseIndex]
+        this[reverseIndex] = tmp
+        reverseIndex--
+    }
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ * 
+ * The sort is _stable_. It means that equal elements preserve their order relative to each other after sorting.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun <T : Comparable<T>> Array<out T>.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sortWith(reverseOrder(), fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ByteArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun ShortArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun IntArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun LongArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun FloatArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun DoubleArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@kotlin.internal.InlineOnly
+public inline fun CharArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
  * Returns a [List] that wraps the original array.
  */
 public actual fun <T> Array<out T>.asList(): List<T> {

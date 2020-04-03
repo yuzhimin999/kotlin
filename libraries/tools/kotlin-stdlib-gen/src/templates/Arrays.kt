@@ -1293,7 +1293,7 @@ object ArrayOps : TemplateGroupBase() {
 
     val f_sort_range = fn("sort(fromIndex: Int = 0, toIndex: Int = size)") {
         platforms(Platform.JVM)
-        include(ArraysOfObjects, ArraysOfPrimitives)
+        include(ArraysOfObjects, ArraysOfPrimitives, ArraysOfUnsigned)
         exclude(PrimitiveType.Boolean)
     } builder {
         doc { "Sorts a range in the array in-place." }
@@ -1307,6 +1307,10 @@ object ArrayOps : TemplateGroupBase() {
         returns("Unit")
         body {
             "java.util.Arrays.sort(this, fromIndex, toIndex)"
+        }
+        specialFor(ArraysOfUnsigned) {
+            inlineOnly()
+            body { "storage.sort(fromIndex, toIndex)" }
         }
     }
 

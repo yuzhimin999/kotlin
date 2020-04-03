@@ -66,6 +66,90 @@ public actual inline fun UShortArray.elementAt(index: Int): UShort {
 }
 
 /**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UIntArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.reverse(fromIndex, toIndex)
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun ULongArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.reverse(fromIndex, toIndex)
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UByteArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.reverse(fromIndex, toIndex)
+}
+
+/**
+ * Reverses elements of the array in the specified range in-place.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UShortArray.reverse(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UIntArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun ULongArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UByteArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place descending according to their natural sort order.
+ */
+@SinceKotlin("1.4")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UShortArray.sortDescending(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    sort(fromIndex, toIndex)
+    reverse(fromIndex, toIndex)
+}
+
+/**
  * Returns a [List] that wraps the original array.
  */
 @SinceKotlin("1.3")
@@ -255,5 +339,45 @@ public fun UShortArray.binarySearch(element: UShort, fromIndex: Int = 0, toIndex
             return mid // key found
     }
     return -(low + 1)  // key not found
+}
+
+/**
+ * Sorts a range in the array in-place.
+ */
+@SinceKotlin("1.3")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UIntArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.sort(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place.
+ */
+@SinceKotlin("1.3")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun ULongArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.sort(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place.
+ */
+@SinceKotlin("1.3")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UByteArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.sort(fromIndex, toIndex)
+}
+
+/**
+ * Sorts a range in the array in-place.
+ */
+@SinceKotlin("1.3")
+@ExperimentalUnsignedTypes
+@kotlin.internal.InlineOnly
+public inline fun UShortArray.sort(fromIndex: Int = 0, toIndex: Int = size): Unit {
+    storage.sort(fromIndex, toIndex)
 }
 

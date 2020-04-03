@@ -53,6 +53,36 @@ object Ordering : TemplateGroupBase() {
         }
     }
 
+    val f_reverse_range = fn("reverse(fromIndex: Int = 0, toIndex: Int = size)") {
+        platforms(Platform.JVM)
+        include(InvariantArraysOfObjects, ArraysOfPrimitives, ArraysOfUnsigned)
+    } builder {
+        since("1.4")
+        inlineOnly()
+        doc { "Reverses elements of the ${f.collection} in the specified range in-place." }
+        returns("Unit")
+        body {
+            """
+            if (fromIndex < 0 || toIndex > size)
+                throw IndexOutOfBoundsException("fromIndex: ${"$"}fromIndex, toIndex: ${"$"}toIndex, size: ${"$"}size")
+            if (fromIndex > toIndex)
+                throw IllegalArgumentException("fromIndex: ${"$"}fromIndex > toIndex: ${"$"}toIndex")
+            val midPoint = (fromIndex + toIndex) / 2
+            if (fromIndex == midPoint) return
+            var reverseIndex = toIndex - 1
+            for (index in fromIndex until midPoint) {
+                val tmp = this[index]
+                this[index] = this[reverseIndex]
+                this[reverseIndex] = tmp
+                reverseIndex--
+            }
+            """
+        }
+        specialFor(ArraysOfUnsigned) {
+            body { """storage.reverse(fromIndex, toIndex)""" }
+        }
+    }
+
     val f_reversed = fn("reversed()") {
         include(Iterables, ArraysOfObjects, ArraysOfPrimitives, ArraysOfUnsigned, CharSequences, Strings)
     } builder {
@@ -234,6 +264,29 @@ object Ordering : TemplateGroupBase() {
                     sort()
                     reverse()
                 }
+            """
+        }
+    }
+
+    val f_sortDescending_range = fn("sortDescending(fromIndex: Int = 0, toIndex: Int = size)") {
+        platforms(Platform.JVM)
+        include(ArraysOfObjects, ArraysOfPrimitives, ArraysOfUnsigned)
+        exclude(PrimitiveType.Boolean)
+    } builder {
+        since("1.4")
+        inlineOnly()
+        doc { """Sorts a range in the ${f.collection} in-place descending according to their natural sort order.""" }
+        if (f == ArraysOfObjects) {
+            appendStableSortNote()
+        }
+        returns("Unit")
+        typeParam("T : Comparable<T>")
+
+        body { """sortWith(reverseOrder(), fromIndex, toIndex)""" }
+        body(ArraysOfPrimitives, ArraysOfUnsigned) {
+            """
+            sort(fromIndex, toIndex)
+            reverse(fromIndex, toIndex)
             """
         }
     }
