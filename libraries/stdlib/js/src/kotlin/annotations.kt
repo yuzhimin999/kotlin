@@ -174,13 +174,13 @@ public annotation class JsQualifier(val value: String)
 @Experimental(level = Experimental.Level.WARNING)
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @SinceKotlin("1.3")
+@MustBeDocumented
 public actual annotation class ExperimentalJsExport
 
 /**
  * Exports top-level declaration.
  *
- * Used in future IR-based backend.
- * Has no effect in current JS backend.
+ * This annotation has effect only in IR-based JS backend.
  */
 @ExperimentalJsExport
 @SinceKotlin("1.3")

@@ -27,18 +27,18 @@ public expect annotation class JsName(val name: String)
 @Experimental(level = Experimental.Level.WARNING)
 @RequiresOptIn(level = RequiresOptIn.Level.WARNING)
 @SinceKotlin("1.4")
+@MustBeDocumented
 @OptionalExpectation
-public expect annotation class ExperimentalJsExport
+public expect annotation class ExperimentalJsExport()
 
 /**
  * Exports top-level declaration.
  *
- * Used in future IR-based backend.
- * Has no effect in current JS backend.
+ * This annotation has effect only in IR-based JS backend.
  */
 @ExperimentalJsExport
 @SinceKotlin("1.4")
 @Retention(AnnotationRetention.BINARY)
 @Target(CLASS, PROPERTY, FUNCTION, FILE)
 @OptionalExpectation
-public expect annotation class JsExport
+public expect annotation class JsExport()
